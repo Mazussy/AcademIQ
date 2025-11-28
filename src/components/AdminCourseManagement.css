@@ -1,0 +1,135 @@
+.admin-course-management {
+  padding: 20px;
+}
+
+.admin-course-management h1 {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.course-list-item {
+  background-color: var(--light-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-info {
+  text-align: left;
+}
+
+.course-info h3 {
+  margin: 0 0 5px;
+  font-size: 1.2rem;
+  color: var(--dark-color);
+}
+
+.course-info p {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.course-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.course-actions button {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 5px;
+  box-shadow: none; /* Override global button shadow */
+  background-image: none;
+}
+
+.course-actions .edit-button {
+  background-color: var(--primary-color);
+}
+
+.course-actions .edit-button:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.course-actions .delete-button {
+  background-color: var(--danger-color);
+}
+
+.course-actions .delete-button:hover {
+  background-color: var(--danger-hover-color);
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--light-color);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: var(--dark-color);
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-content label {
+  text-align: left;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.modal-content .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-content .form-actions button {
+  background-image: none; /* Override global button gradient */
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.modal-content .form-actions .cancel-button {
+  background-color: #6c757d;
+}
+
+.modal-content .form-actions .cancel-button:hover {
+  background-color: #5a6268;
+}

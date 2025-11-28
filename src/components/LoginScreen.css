@@ -1,0 +1,38 @@
+.login-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.login-tab {
+  padding: 12px 25px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  font-size: 1.05rem;
+  color: #555555; /* Default tab text color - a neutral gray */
+  position: relative;
+  transition: color 0.3s, background-color 0.3s;
+  margin: 0 5px;
+  font-weight: 500;
+}
+
+.login-tab:hover {
+  color: #000000; /* Darken text to black on hover */
+}
+
+.login-tab.active {
+  color: #000000; /* Active tab text color - black */
+  font-weight: 600;
+  background-color: transparent; /* No background for active tab */
+}
+
+.login-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px; /* A thinner, sleek indicator */
+  background-color: #000000; /* Solid black for indicator */
+}
