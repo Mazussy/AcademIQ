@@ -8,7 +8,7 @@ const LandingPage = () => {
         <h1>Welcome to AcademIQ</h1>
         <p>Your intelligent hub for managing your academic journey.</p>
         <Link to="/login">
-          <button>Get Started</button>
+          <button className="get-started-button">Get Started</button>
         </Link>
       </div>
     </div>

@@ -23,6 +23,10 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.student-info-list li:nth-child(2) {
+  border-bottom: none !important;
+}
+
 .student-info-list li:last-child {
   border-bottom: none;
 }

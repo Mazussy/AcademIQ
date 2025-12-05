@@ -11,6 +11,8 @@ const AdminCourseManagement = () => {
   const [formCourseId, setFormCourseId] = useState('');
   const [formCourseName, setFormCourseName] = useState('');
   const [formCourseCredits, setFormCourseCredits] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCourse, setExpandedCourse] = useState(null);
 
   const fetchCourses = async () => {
     setIsLoading(true);
@@ -103,28 +105,77 @@ const AdminCourseManagement = () => {
   return (
     <div className="page-container admin-course-management">
       <h1>Course Management</h1>
-      <button onClick={handleAddClick} style={{ marginBottom: '20px' }}>
-        Add New Course
-      </button>
+      <div className="course-top-bar">
+        <div className="search-wrapper">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search by course name or ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search courses"
+          />
+        </div>
+        <div className="button-wrapper">
+          <button className="add-course-button" onClick={handleAddClick}>
+            Add New Course
+          </button>
+        </div>
+      </div>
 
       {courses.length === 0 && !isLoading && !error && (
         <p>No courses available.</p>
       )}
 
       <div>
-        {courses.map((course) => (
-          <div key={course.id} className="course-list-item">
-            <div className="course-info">
+        {courses
+          .filter((course) => {
+            if (!searchQuery) return true;
+            const q = searchQuery.toLowerCase();
+            return (
+              course.name.toLowerCase().includes(q) ||
+              course.id.toLowerCase().includes(q)
+            );
+          })
+          .map((course) => (
+          <div key={course.id} className="student-list-item">
+            <div className="student-info" onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}>
               <h3>{course.name} ({course.id})</h3>
-              <p>Credits: {course.credits}</p>
             </div>
-            <div className="course-actions">
-              <button className="edit-button" onClick={() => handleEditClick(course)}>
+            <div className="student-actions">
+              <button
+                className="edit-button"
+                onClick={() => handleEditClick(course)}
+              >
                 Edit
               </button>
-              <button className="delete-button" onClick={() => handleDeleteClick(course.id)}>
+              <button
+                className="delete-button"
+                onClick={() => handleDeleteClick(course.id)}
+              >
                 Delete
               </button>
+              <span
+                className={`arrow ${
+                  expandedCourse === course.id ? "expanded" : ""
+                }`}
+              >
+                &#9654;
+              </span>
+            </div>
+
+            <div className={`student-details ${expandedCourse === course.id ? 'expanded' : ''}`}>
+              <ul>
+                <li><strong>Course ID:</strong> <span>{course.id || 'N/A'}</span></li>
+                <li><strong>Instructor ID:</strong> <span>{course.instructorId || course.instructor || 'TBD'}</span></li>
+                <li><strong>Classroom ID:</strong> <span>{course.classroomId || course.classroom || 'TBD'}</span></li>
+                <li><strong>Semester:</strong> <span>{course.semester || 'N/A'}</span></li>
+                <li><strong>Year:</strong> <span>{course.year || new Date().getFullYear()}</span></li>
+                <li><strong>Day/Time:</strong> <span>{course.day_time || course.schedule || 'TBD'}</span></li>
+                <li><strong>Capacity:</strong> <span>{course.capacity ?? 'N/A'}</span></li>
+                <li><strong>Enrolled Count:</strong> <span>{course.enrolled ?? 0}</span></li>
+                <li><strong>Start - End:</strong> <span>{(course.startDate && course.endDate) ? `${course.startDate} - ${course.endDate}` : (course.start_end || 'TBD')}</span></li>
+              </ul>
             </div>
           </div>
         ))}

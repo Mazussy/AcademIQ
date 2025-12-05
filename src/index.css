@@ -99,6 +99,17 @@ button:disabled {
   box-shadow: none;
 }
 
+.get-started-button {
+  background-color: #1e201e !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.get-started-button:hover {
+  background-color: #0a0a0a !important;
+  box-shadow: none !important;
+}
+
 label {
   display: block;
   margin-bottom: 8px;

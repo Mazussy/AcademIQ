@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../api/mockApi';
-import './LoginScreen.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { login } from "../api/mockApi";
+import "./LoginScreen.css";
 
 const LoginScreen = () => {
-  const [activeTab, setActiveTab] = useState('student'); // 'student', 'admin', 'instructor'
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState("student"); // 'student', 'admin', 'instructor'
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       const response = await login(userId, password, activeTab);
       if (response.success) {
-        if (response.user.role === 'student') {
+        if (response.user.role === "student") {
           navigate(`/dashboard/${response.user.id}`);
-        } else if (response.user.role === 'admin') {
+        } else if (response.user.role === "admin") {
           // Placeholder for admin dashboard navigation
           navigate(`/admin/dashboard/${response.user.id}`);
         }
@@ -30,16 +30,17 @@ const LoginScreen = () => {
         setError(response.message);
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const renderForm = () => {
-    const idLabel = activeTab === 'student' ? 'Student ID' : 'User ID';
-    const idPlaceholder = activeTab === 'student' ? 'e.g., S12345' : 'e.g., A001';
-    
+    const idLabel = activeTab === "student" ? "Student ID" : "User ID";
+    const idPlaceholder =
+      activeTab === "student" ? "e.g., S12345" : "e.g., A001";
+
     return (
       <form onSubmit={handleLogin}>
         <label>
@@ -62,40 +63,88 @@ const LoginScreen = () => {
             placeholder="Enter password"
           />
         </label>
-        <button type="submit" disabled={isLoading} style={{ width: '100%', marginTop: '10px' }}>
-          {isLoading ? 'Logging in...' : 'Login'}
+        <button
+          type="submit"
+          className="login-button"
+          disabled={isLoading}
+          style={{ width: "100%", marginTop: "10px" }}
+        >
+          {isLoading ? "Logging in..." : "Login"}
         </button>
       </form>
     );
-  }
+  };
+
+  const getTabIndex = () => {
+    if (activeTab === "student") return 0;
+    if (activeTab === "admin") return 1;
+    return 2;
+  };
+
+  const tabRefs = React.useRef({
+    student: null,
+    admin: null,
+    instructor: null,
+  });
+
+  const [underlineStyle, setUnderlineStyle] = React.useState({
+    width: 0,
+    left: 0,
+  });
+
+  React.useEffect(() => {
+    const activeTabRef = tabRefs.current[activeTab];
+    if (activeTabRef) {
+      setUnderlineStyle({
+        width: activeTabRef.offsetWidth,
+        left: activeTabRef.offsetLeft,
+      });
+    }
+  }, [activeTab]);
 
   return (
     <div className="centered-container">
       <div className="card">
         <div className="login-tabs">
+          <div
+            className="tab-underline"
+            style={{
+              width: underlineStyle.width,
+              left: underlineStyle.left,
+            }}
+          ></div>
           <button
-            className={`login-tab ${activeTab === 'student' ? 'active' : ''}`}
-            onClick={() => setActiveTab('student')}
+            ref={(el) => (tabRefs.current.student = el)}
+            className={`login-tab ${activeTab === "student" ? "active" : ""}`}
+            onClick={() => setActiveTab("student")}
           >
             Student
           </button>
           <button
-            className={`login-tab ${activeTab === 'admin' ? 'active' : ''}`}
-            onClick={() => setActiveTab('admin')}
+            ref={(el) => (tabRefs.current.admin = el)}
+            className={`login-tab ${activeTab === "admin" ? "active" : ""}`}
+            onClick={() => setActiveTab("admin")}
           >
             Admin
           </button>
           <button
-            className={`login-tab ${activeTab === 'instructor' ? 'active' : ''}`}
-            onClick={() => setActiveTab('instructor')}
+            ref={(el) => (tabRefs.current.instructor = el)}
+            className={`login-tab ${
+              activeTab === "instructor" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("instructor")}
           >
             Instructor
           </button>
         </div>
-        
+
         {renderForm()}
-        
-        {error && <p style={{ color: 'var(--danger-color)', marginTop: '15px' }}>{error}</p>}
+
+        {error && (
+          <p style={{ color: "var(--danger-color)", marginTop: "15px" }}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

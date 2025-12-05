@@ -39,13 +39,25 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(42, 111, 71, 0.1);
+  border-color: var(--dark-color);
+  box-shadow: 0 0 0 3px rgba(18, 18, 18, 0.1);
 }
 
 .user-registry-form button {
   width: 100%;
   margin-top: 20px;
+  background-color: #1e201e !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: white !important;
+}
+
+.user-registry-form button:hover {
+  background-color: #0a0a0a !important;
+}
+
+.user-registry-form button:disabled {
+  background-color: #ccc !important;
 }
 
 .error-message {
