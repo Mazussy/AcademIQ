@@ -1,75 +1,147 @@
-.user-registry-form {
-  max-width: 500px;
-  margin: 40px auto;
-  background-color: var(--light-color);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px var(--shadow-color);
-  border: 1px solid var(--border-color);
-}
-
-.user-registry-form h1 {
-  text-align: center;
+.register-tabs {
+  display: flex;
+  justify-content: center;
   margin-bottom: 30px;
+  position: relative;
 }
 
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
+.centered-container {
+  padding-top: 60px !important;
+  padding-bottom: 60px !important;
+  min-height: calc(100vh - 80px) !important;
+  height: 100% !important;
+  justify-content: flex-start !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
+.centered-container .card {
+  max-width: 520px;
+  padding: 70px 70px 0 70px;
+  transform: scale(1.15);
+  transform-origin: center;
+  margin-top: 40px;
+  margin-bottom: 60px;
+  flex-shrink: 0;
+}
+
+.centered-container .card form {
+  margin-bottom: 0 !important;
+}
+
+.centered-container .card > p {
+  padding-bottom: 20px;
+}
+
+/* Ensure parent main extends to viewport */
+main:has(.centered-container) {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+.register-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.tab-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background-color: #000000;
+  transition: width 0.4s ease-in-out, left 0.4s ease-in-out;
+}
+
+.register-tab {
+  padding: 12px 25px;
+  cursor: pointer;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  font-size: 1.05rem;
+  color: #555555;
+  position: relative;
+  transition: color 0.3s, background-color 0.3s;
+  margin: 0 5px;
   font-weight: 500;
-  color: var(--dark-color);
+  box-shadow: none;
 }
 
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
+.register-tab:hover {
+  color: #000000;
+  transform: none;
+  box-shadow: none;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--dark-color);
-  box-shadow: 0 0 0 3px rgba(18, 18, 18, 0.1);
+.register-tab.active {
+  color: #000000;
+  font-weight: 600;
+  background-color: transparent;
 }
 
-.user-registry-form button {
-  width: 100%;
-  margin-top: 20px;
+.register-button {
   background-color: #1e201e !important;
   background-image: none !important;
   box-shadow: none !important;
-  color: white !important;
+  margin-bottom: 5px !important;
 }
 
-.user-registry-form button:hover {
+.register-button:hover {
   background-color: #0a0a0a !important;
+  box-shadow: none !important;
+  transform: translateY(-2px);
 }
 
-.user-registry-form button:disabled {
-  background-color: #ccc !important;
+form {
+  margin-bottom: 0 !important;
+  padding-bottom: 15px !important;
 }
 
-.error-message {
-  color: var(--danger-color);
-  text-align: center;
-  margin-top: 20px;
+form label {
+  display: block;
+  margin-bottom: 15px;
+  text-align: left;
   font-weight: 500;
 }
 
-.success-message {
-  color: var(--primary-color);
-  text-align: center;
-  margin-top: 20px;
-  font-weight: 500;
+/* Remove margin from last label before button */
+form label:last-of-type {
+  margin-bottom: 15px;
+}
+
+/* Remove extra space after button */
+form button:last-child {
+  margin-bottom: 0 !important;
+}
+
+form label input[type="text"],
+form label input[type="password"],
+form label input[type="email"],
+form label input[type="tel"],
+form label input[type="number"],
+form label input[type="date"] {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 5px !important;
+  margin-bottom: 0 !important;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus {
+  border-color: #1e201e !important;
+  box-shadow: 0 0 0 3px rgba(30, 32, 30, 0.1) !important;
 }
