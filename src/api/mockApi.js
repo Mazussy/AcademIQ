@@ -40,22 +40,14 @@ let courses = [ // Make courses mutable
     { id: 'EN101', name: 'English Composition I', credits: 3 },
 ];
 
-let classrooms = [ // Mock classroom data
-<<<<<<< HEAD
+let classrooms = [ // Mock classroom data (merged with availability and assignment)
   { id: 'CR101', name: 'Lecture Hall A', capacity: 100, available: true, assignedTo: null },
   { id: 'CR102', name: 'Lecture Hall B', capacity: 80, available: true, assignedTo: null },
   { id: 'CR201', name: 'Seminar Room 1', capacity: 30, available: false, assignedTo: 'CS101' },
   { id: 'CR202', name: 'Seminar Room 2', capacity: 25, available: true, assignedTo: null },
 ];
 
-=======
-  { id: 'CR101', name: 'Lecture Hall A', capacity: 100 },
-  { id: 'CR102', name: 'Lecture Hall B', capacity: 80 },
-  { id: 'CR201', name: 'Seminar Room 1', capacity: 30 },
-  { id: 'CR202', name: 'Seminar Room 2', capacity: 25 },
-];
-
-// New detailed schedule data
+// Detailed schedule data per classroom
 const classroomSchedules = {
   CR101: [
     { day: 'Sunday', time: '09:00-11:00', courseId: 'CS101' },
@@ -75,10 +67,8 @@ const classroomSchedules = {
     { day: 'Wednesday', time: '09:00-11:00', courseId: 'CS101' },
     { day: 'Thursday', time: '09:00-11:00', courseId: 'MA201' },
   ],
-  CR202: [], // This classroom is currently empty
+  CR202: [],
 };
-
->>>>>>> 07e2c28144bc60b2133aed90651619afb5a9368b
 const attendanceData = {
   S12345: {
     overallPercentage: 92,
@@ -140,7 +130,6 @@ export const getStudentData = (studentId) => {
     setTimeout(() => {
       const student = users[studentId];
       if (student && student.role === 'student') {
-        // Return a copy of the student data, omitting the password
         const { password, ...studentData } = student;
         resolve({
           success: true,
@@ -183,16 +172,17 @@ export const getAllStudents = () => {
  * @returns {Promise<{success: boolean, data?: object[], message: string}>}
  */
 export const getCourses = () => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                success: true,
-                data: courses,
-                message: 'Courses fetched successfully!',
-            });
-        }, 600); // Simulate network delay
-    });
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        success: true,
+        data: courses,
+        message: 'Courses fetched successfully!',
+      });
+    }, 600); // Simulate network delay
+  });
 };
+
 
 /**
  * Simulates adding a new course.
@@ -309,7 +299,6 @@ export const getClassrooms = () => {
   });
 };
 
-<<<<<<< HEAD
 /**
  * Simulates updating a classroom's availability.
  * @param {string} classroomId
@@ -351,7 +340,10 @@ export const assignClassroom = (classroomId, courseId) => {
         resolve({ success: true, message: `Classroom ${courseId ? 'assigned to' : 'unassigned from'} ${courseId || 'course'}.` });
       } else {
         resolve({ success: false, message: 'Classroom not found.' });
-=======
+      }
+    }, 500);
+  });
+};
 
 /**
  * Simulates fetching schedule for a specific classroom.
@@ -381,7 +373,6 @@ export const getClassroomSchedules = (classroomId) => {
           success: false,
           message: 'Schedule not found for this classroom.',
         });
->>>>>>> 07e2c28144bc60b2133aed90651619afb5a9368b
       }
     }, 500);
   });

@@ -12,13 +12,6 @@
   --danger-hover-color: #c0392b;
   --success-color: #28a745;
   --warning-color: #ffc107;
-<<<<<<< HEAD
-=======
-  /* Added to support AdminClassroomManagement styles */
-  --light-grey-color: #f0f2f4;
-  --dark-grey-color: #666666;
-  --primary-light-color: #d9eadf; /* Light tint of primary */
->>>>>>> 07e2c28144bc60b2133aed90651619afb5a9368b
 }
 
 body {
