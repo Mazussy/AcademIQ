@@ -41,12 +41,44 @@ let courses = [ // Make courses mutable
 ];
 
 let classrooms = [ // Mock classroom data
+<<<<<<< HEAD
   { id: 'CR101', name: 'Lecture Hall A', capacity: 100, available: true, assignedTo: null },
   { id: 'CR102', name: 'Lecture Hall B', capacity: 80, available: true, assignedTo: null },
   { id: 'CR201', name: 'Seminar Room 1', capacity: 30, available: false, assignedTo: 'CS101' },
   { id: 'CR202', name: 'Seminar Room 2', capacity: 25, available: true, assignedTo: null },
 ];
 
+=======
+  { id: 'CR101', name: 'Lecture Hall A', capacity: 100 },
+  { id: 'CR102', name: 'Lecture Hall B', capacity: 80 },
+  { id: 'CR201', name: 'Seminar Room 1', capacity: 30 },
+  { id: 'CR202', name: 'Seminar Room 2', capacity: 25 },
+];
+
+// New detailed schedule data
+const classroomSchedules = {
+  CR101: [
+    { day: 'Sunday', time: '09:00-11:00', courseId: 'CS101' },
+    { day: 'Sunday', time: '11:00-13:00', courseId: 'MA201' },
+    { day: 'Monday', time: '09:00-11:00', courseId: 'PY105' },
+    { day: 'Tuesday', time: '14:00-16:00', courseId: 'CS101' },
+    { day: 'Wednesday', time: '11:00-13:00', courseId: 'EN101' },
+  ],
+  CR102: [
+    { day: 'Monday', time: '11:00-13:00', courseId: 'EN101' },
+    { day: 'Tuesday', time: '09:00-11:00', courseId: 'MA201' },
+    { day: 'Thursday', time: '16:00-18:00', courseId: 'PY105' },
+  ],
+  CR201: [
+    { day: 'Sunday', time: '14:00-16:00', courseId: 'PY105' },
+    { day: 'Tuesday', time: '11:00-13:00', courseId: 'EN101' },
+    { day: 'Wednesday', time: '09:00-11:00', courseId: 'CS101' },
+    { day: 'Thursday', time: '09:00-11:00', courseId: 'MA201' },
+  ],
+  CR202: [], // This classroom is currently empty
+};
+
+>>>>>>> 07e2c28144bc60b2133aed90651619afb5a9368b
 const attendanceData = {
   S12345: {
     overallPercentage: 92,
@@ -277,6 +309,7 @@ export const getClassrooms = () => {
   });
 };
 
+<<<<<<< HEAD
 /**
  * Simulates updating a classroom's availability.
  * @param {string} classroomId
@@ -318,6 +351,37 @@ export const assignClassroom = (classroomId, courseId) => {
         resolve({ success: true, message: `Classroom ${courseId ? 'assigned to' : 'unassigned from'} ${courseId || 'course'}.` });
       } else {
         resolve({ success: false, message: 'Classroom not found.' });
+=======
+
+/**
+ * Simulates fetching schedule for a specific classroom.
+ * @param {string} classroomId
+ * @returns {Promise<{success: boolean, data?: object[], message: string}>}
+ */
+export const getClassroomSchedules = (classroomId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const schedule = classroomSchedules[classroomId];
+      if (schedule) {
+        // In a real app, you might want to join this with course data
+        const detailedSchedule = schedule.map(slot => {
+          const course = courses.find(c => c.id === slot.courseId);
+          return {
+            ...slot,
+            courseName: course ? course.name : 'Unknown Course',
+          };
+        });
+        resolve({
+          success: true,
+          data: detailedSchedule,
+          message: 'Schedule fetched successfully!',
+        });
+      } else {
+        resolve({
+          success: false,
+          message: 'Schedule not found for this classroom.',
+        });
+>>>>>>> 07e2c28144bc60b2133aed90651619afb5a9368b
       }
     }, 500);
   });

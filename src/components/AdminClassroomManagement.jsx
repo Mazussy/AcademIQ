@@ -1,89 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getClassrooms, updateClassroomAvailability, assignClassroom, getCourses } from '../api/mockApi';
+import { getClassrooms, getClassroomSchedules } from '../api/mockApi';
 import './AdminClassroomManagement.css';
 
 const AdminClassroomManagement = () => {
   const [classrooms, setClassrooms] = useState([]);
-  const [courses, setCourses] = useState([]); // To populate the assign dropdown
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filterAvailability, setFilterAvailability] = useState('all'); // 'all', 'available', 'unavailable'
-  const [searchQuery, setSearchQuery] = useState('');
-  const { adminId } = useParams(); // To be used for API calls if needed
-
-  const fetchClassroomsAndCourses = async () => {
-    setIsLoading(true);
-    try {
-      const [classroomsResponse, coursesResponse] = await Promise.all([
-        getClassrooms(),
-        getCourses(),
-      ]);
-
-      if (classroomsResponse.success) {
-        setClassrooms(classroomsResponse.data);
-      } else {
-        setError(classroomsResponse.message);
-      }
-
-      if (coursesResponse.success) {
-        setCourses(coursesResponse.data);
-      } else {
-        setError(coursesResponse.message); // This might overwrite classroom error, handle better in production
-      }
-    } catch (err) {
-      setError('An unexpected error occurred while fetching data.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [expandedClassroom, setExpandedClassroom] = useState(null);
 
   useEffect(() => {
-    fetchClassroomsAndCourses();
+    const fetchClassrooms = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getClassrooms();
+        if (response.success) {
+          setClassrooms(response.data);
+        } else {
+          setError(response.message);
+        }
+      } catch (err) {
+        setError('An unexpected error occurred while fetching classroom data.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchClassrooms();
   }, []);
 
-  const handleToggleAvailability = async (classroomId, currentStatus) => {
-    try {
-      const response = await updateClassroomAvailability(classroomId, !currentStatus);
-      if (response.success) {
-        alert(response.message);
-        fetchClassroomsAndCourses(); // Refresh list
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
-      setError('Error updating availability.');
-    }
+  const handleClassroomClick = (classroomId) => {
+    setExpandedClassroom(expandedClassroom === classroomId ? null : classroomId);
   };
-
-  const handleAssignCourse = async (classroomId, courseId) => {
-    try {
-      const response = await assignClassroom(classroomId, courseId === 'unassign' ? null : courseId);
-      if (response.success) {
-        alert(response.message);
-        fetchClassroomsAndCourses(); // Refresh list
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
-      setError('Error assigning classroom.');
-    }
-  };
-
-  const filteredClassrooms = classrooms.filter((classroom) => {
-    const matchesAvailability =
-      filterAvailability === 'all' ||
-      (filterAvailability === 'available' && classroom.available) ||
-      (filterAvailability === 'unavailable' && !classroom.available);
-
-    const matchesSearch =
-      classroom.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      classroom.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (classroom.assignedTo &&
-        classroom.assignedTo.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return matchesAvailability && matchesSearch;
-  });
 
   if (isLoading) {
     return <div className="page-container">Loading classroom data...</div>;
@@ -94,62 +41,106 @@ const AdminClassroomManagement = () => {
   }
 
   return (
-    <div className="page-container classroom-management">
+    <div className="page-container admin-list-container">
       <h1>Classroom Management</h1>
-
-      <div className="classroom-filter-bar">
-        <input
-          type="text"
-          placeholder="Search by name or ID..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <select value={filterAvailability} onChange={(e) => setFilterAvailability(e.target.value)}>
-          <option value="all">All</option>
-          <option value="available">Available</option>
-          <option value="unavailable">Unavailable</option>
-        </select>
-      </div>
-
-      <div className="classroom-list">
-        {filteredClassrooms.length === 0 && !isLoading && !error && (
-          <p>No classrooms found matching your criteria.</p>
-        )}
-        {filteredClassrooms.map((classroom) => (
-          <div key={classroom.id} className="classroom-card">
-            <h3>{classroom.name} ({classroom.id})</h3>
-            <p>Capacity: {classroom.capacity}</p>
-            <p className="classroom-status">
-              Status: <span className={classroom.available ? 'status-available' : 'status-unavailable'}>
-                {classroom.available ? 'Available' : 'Unavailable'}
-              </span>
-            </p>
-            {classroom.assignedTo && <p>Assigned To: {classroom.assignedTo}</p>}
-
-            <div className="classroom-actions">
-              <button
-                onClick={() => handleToggleAvailability(classroom.id, classroom.available)}
-                style={{ backgroundColor: classroom.available ? 'var(--danger-color)' : 'var(--primary-color)' }}
-              >
-                {classroom.available ? 'Mark Unavailable' : 'Mark Available'}
-              </button>
-
-              <select
-                onChange={(e) => handleAssignCourse(classroom.id, e.target.value)}
-                value={classroom.assignedTo || 'unassign'}
-              >
-                <option value="unassign">Unassign Course</option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.name} ({course.id})
-                  </option>
-                ))}
-              </select>
+      <div>
+        {classrooms.map((classroom) => (
+          <div key={classroom.id} className="list-item">
+            <div className="list-header" onClick={() => handleClassroomClick(classroom.id)}>
+              <h3>{classroom.name}</h3>
+              <span className={`arrow ${expandedClassroom === classroom.id ? 'expanded' : ''}`}>&#9654;</span>
+            </div>
+            <div className={`details-container ${expandedClassroom === classroom.id ? 'expanded' : ''}`}>
+              {expandedClassroom === classroom.id && (
+                <ClassroomSchedule classroomId={classroom.id} />
+              )}
             </div>
           </div>
         ))}
       </div>
     </div>
+  );
+};
+
+const ClassroomSchedule = ({ classroomId }) => {
+  const [schedule, setSchedule] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getClassroomSchedules(classroomId);
+        if (response.success) {
+          setSchedule(response.data);
+        } else {
+          setError(response.message);
+        }
+      } catch (err) {
+        setError('An unexpected error occurred while fetching the schedule.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSchedule();
+  }, [classroomId]);
+
+  if (isLoading) {
+    return <div>Loading schedule...</div>;
+  }
+
+  if (error) {
+    return <div style={{ color: 'var(--danger-color)' }}>Error: {error}</div>;
+  }
+
+  // --- Schedule Rendering Logic ---
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+  const timeSlots = ['09:00-11:00', '11:00-13:00', '14:00-16:00', '16:00-18:00'];
+  const breakSlot = '13:00-14:00';
+
+  // Create a lookup map for quick access to scheduled courses
+  const scheduleMap = new Map();
+  schedule?.forEach(item => {
+    scheduleMap.set(`${item.day}-${item.time}`, item.courseName);
+  });
+
+  return (
+    <table className="schedule-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          {days.map(day => <th key={day}>{day}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {timeSlots.map((time, index) => (
+          <React.Fragment key={time}>
+            {/* Add Break Row */}
+            {index === 2 && (
+              <tr className="break-row">
+                <td className="time-slot-header">{breakSlot}</td>
+                <td colSpan={days.length}>Break</td>
+              </tr>
+            )}
+            {/* Regular Schedule Row */}
+            <tr>
+              <td className="time-slot-header">{time}</td>
+              {days.map(day => {
+                const key = `${day}-${time}`;
+                const courseName = scheduleMap.get(key);
+                return (
+                  <td key={key} className={courseName ? 'schedule-slot-taken' : 'schedule-slot-free'}>
+                    {courseName || 'Free'}
+                  </td>
+                );
+              })}
+            </tr>
+          </React.Fragment>
+        ))}
+      </tbody>
+    </table>
   );
 };
 
