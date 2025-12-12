@@ -11,6 +11,15 @@ const AdminCourseManagement = () => {
   const [formCourseId, setFormCourseId] = useState('');
   const [formCourseName, setFormCourseName] = useState('');
   const [formCourseCredits, setFormCourseCredits] = useState('');
+  const [formInstructorId, setFormInstructorId] = useState('');
+  const [formClassroomId, setFormClassroomId] = useState('');
+  const [formSemester, setFormSemester] = useState('');
+  const [formYear, setFormYear] = useState('');
+  const [formDayTime, setFormDayTime] = useState('');
+  const [formCapacity, setFormCapacity] = useState('');
+  const [formEnrolledCount, setFormEnrolledCount] = useState('');
+  const [formStartDate, setFormStartDate] = useState('');
+  const [formEndDate, setFormEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCourse, setExpandedCourse] = useState(null);
 
@@ -39,6 +48,15 @@ const AdminCourseManagement = () => {
     setFormCourseId('');
     setFormCourseName('');
     setFormCourseCredits('');
+    setFormInstructorId('');
+    setFormClassroomId('');
+    setFormSemester('');
+    setFormYear('');
+    setFormDayTime('');
+    setFormCapacity('');
+    setFormEnrolledCount('');
+    setFormStartDate('');
+    setFormEndDate('');
     setShowModal(true);
   };
 
@@ -47,6 +65,15 @@ const AdminCourseManagement = () => {
     setFormCourseId(course.id);
     setFormCourseName(course.name);
     setFormCourseCredits(course.credits);
+    setFormInstructorId(course.instructorId || course.instructor || '');
+    setFormClassroomId(course.classroomId || course.classroom || '');
+    setFormSemester(course.semester || '');
+    setFormYear(course.year || '');
+    setFormDayTime(course.day_time || course.schedule || '');
+    setFormCapacity(course.capacity || '');
+    setFormEnrolledCount(course.enrolled || course.enrolledCount || '');
+    setFormStartDate(course.startDate || '');
+    setFormEndDate(course.endDate || '');
     setShowModal(true);
   };
 
@@ -72,6 +99,15 @@ const AdminCourseManagement = () => {
       id: formCourseId,
       name: formCourseName,
       credits: parseInt(formCourseCredits, 10),
+      instructorId: formInstructorId,
+      classroomId: formClassroomId,
+      semester: formSemester,
+      year: formYear ? parseInt(formYear, 10) : undefined,
+      day_time: formDayTime,
+      capacity: formCapacity ? parseInt(formCapacity, 10) : undefined,
+      enrolled: formEnrolledCount ? parseInt(formEnrolledCount, 10) : undefined,
+      startDate: formStartDate,
+      endDate: formEndDate,
     };
 
     try {
@@ -212,6 +248,79 @@ const AdminCourseManagement = () => {
                   value={formCourseCredits}
                   onChange={(e) => setFormCourseCredits(e.target.value)}
                   required
+                />
+              </label>
+              <label>
+                Instructor ID:
+                <input
+                  type="text"
+                  value={formInstructorId}
+                  onChange={(e) => setFormInstructorId(e.target.value)}
+                />
+              </label>
+              <label>
+                Classroom ID:
+                <input
+                  type="text"
+                  value={formClassroomId}
+                  onChange={(e) => setFormClassroomId(e.target.value)}
+                />
+              </label>
+              <label>
+                Semester:
+                <input
+                  type="text"
+                  value={formSemester}
+                  onChange={(e) => setFormSemester(e.target.value)}
+                />
+              </label>
+              <label>
+                Year:
+                <input
+                  type="number"
+                  value={formYear}
+                  onChange={(e) => setFormYear(e.target.value)}
+                />
+              </label>
+              <label>
+                Day/Time:
+                <input
+                  type="text"
+                  value={formDayTime}
+                  onChange={(e) => setFormDayTime(e.target.value)}
+                  placeholder="e.g., Mon/Wed 10:00-11:30"
+                />
+              </label>
+              <label>
+                Capacity:
+                <input
+                  type="number"
+                  value={formCapacity}
+                  onChange={(e) => setFormCapacity(e.target.value)}
+                />
+              </label>
+              <label>
+                Enrolled Count:
+                <input
+                  type="number"
+                  value={formEnrolledCount}
+                  onChange={(e) => setFormEnrolledCount(e.target.value)}
+                />
+              </label>
+              <label>
+                Start Date:
+                <input
+                  type="date"
+                  value={formStartDate}
+                  onChange={(e) => setFormStartDate(e.target.value)}
+                />
+              </label>
+              <label>
+                End Date:
+                <input
+                  type="date"
+                  value={formEndDate}
+                  onChange={(e) => setFormEndDate(e.target.value)}
                 />
               </label>
               <div className="form-actions">
