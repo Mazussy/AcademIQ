@@ -1,0 +1,36 @@
+.dashboard-card {
+  background-color: var(--light-color);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  text-align: left;
+}
+
+.dashboard-card h1 {
+  margin-top: 0;
+}
+
+.student-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.student-info-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.student-info-list li:nth-child(2) {
+  border-bottom: none !important;
+}
+
+.student-info-list li:last-child {
+  border-bottom: none;
+}
+
+.student-info-list strong {
+  color: var(--dark-color);
+}

@@ -1,0 +1,114 @@
+.admin-list-container {
+    padding: 20px;
+  }
+  
+  .admin-list-container h1 {
+    margin-bottom: 25px;
+    text-align: center;
+  }
+  
+  .list-item {
+    background-color: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    transition: box-shadow 0.3s;
+  }
+  
+  .list-item:hover {
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+  
+  .list-header {
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .list-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--dark-color);
+  }
+  
+  .details-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+    padding: 0 20px;
+    border-top: 1px solid var(--border-color);
+    text-align: left;
+  }
+  
+  .details-container.expanded {
+    max-height: 500px; /* Adjust as needed for the schedule table */
+    padding: 20px;
+  }
+
+  .arrow {
+    transition: transform 0.3s;
+    font-size: 0.8rem;
+  }
+  
+  .arrow.expanded {
+    transform: rotate(90deg);
+  }
+  
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .schedule-table th,
+  .schedule-table td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  .schedule-table thead {
+    background-color: var(--light-grey-color);
+  }
+  
+  .schedule-table th {
+    font-weight: bold;
+    color: var(--dark-color);
+  }
+  
+  .time-slot-header {
+    font-weight: bold;
+    color: var(--dark-grey-color);
+    font-size: 0.9rem;
+  }
+
+  .schedule-slot-free {
+    color: var(--dark-grey-color);
+    font-style: italic;
+  }
+  
+  .schedule-slot-taken {
+  
+      background-color: var(--primary-light-color);
+  
+      font-weight: bold;
+  
+    }
+  
+  
+  
+    .break-row td {
+  
+      background-color: var(--light-grey-color);
+  
+      font-weight: bold;
+  
+      color: var(--dark-grey-color);
+  
+    }
+  
+    

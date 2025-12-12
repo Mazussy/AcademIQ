@@ -1,0 +1,75 @@
+.user-registry-form {
+  max-width: 500px;
+  margin: 40px auto;
+  background-color: var(--light-color);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px var(--shadow-color);
+  border: 1px solid var(--border-color);
+}
+
+.user-registry-form h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--dark-color);
+  box-shadow: 0 0 0 3px rgba(18, 18, 18, 0.1);
+}
+
+.user-registry-form button {
+  width: 100%;
+  margin-top: 20px;
+  background-color: #1e201e !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: white !important;
+}
+
+.user-registry-form button:hover {
+  background-color: #0a0a0a !important;
+}
+
+.user-registry-form button:disabled {
+  background-color: #ccc !important;
+}
+
+.error-message {
+  color: var(--danger-color);
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 500;
+}
+
+.success-message {
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 500;
+}
