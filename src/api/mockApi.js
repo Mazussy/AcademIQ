@@ -81,12 +81,20 @@ let courses = [ // Make courses mutable
     { id: 'EN101', name: 'English Composition I', credits: 3, classroom: 'CR101', instructorId: 'I004', day: 'Wednesday', time: '11:00-13:00' },
 ];
 
+const enrollments = {
+  CS101: ['S12345', 'S67890'],
+  MA201: ['S12345'],
+  PY105: ['S12345'],
+  EN101: ['S67890'],
+};
+
 let classrooms = [ // Mock classroom data (merged with availability and assignment)
   { id: 'CR101', name: 'Lecture Hall A', capacity: 100, available: true, assignedTo: null },
   { id: 'CR102', name: 'Lecture Hall B', capacity: 80, available: true, assignedTo: null },
   { id: 'CR201', name: 'Seminar Room 1', capacity: 30, available: false, assignedTo: 'CS101' },
   { id: 'CR202', name: 'Seminar Room 2', capacity: 25, available: true, assignedTo: null },
 ];
+
 
 // Detailed schedule data per classroom
 const classroomSchedules = {
@@ -167,7 +175,7 @@ export const login = (userId, password, role) => {
     setTimeout(() => {
       const user = users[userId];
       if (user && user.password === password && user.role === role) {
-        const { password, ...userData } = user;
+        const { password: _password, ...userData } = user;
         resolve({
           success: true,
           user: userData,
@@ -193,7 +201,7 @@ export const getStudentData = (studentId) => {
     setTimeout(() => {
       const student = users[studentId];
       if (student && student.role === 'student') {
-        const { password, ...studentData } = student;
+        const { password: _password, ...studentData } = student;
         resolve({
           success: true,
           data: studentData,
@@ -218,7 +226,7 @@ export const getAllStudents = () => {
     setTimeout(() => {
       const allStudents = Object.values(users).filter(user => user.role === 'student');
       const studentsWithoutPasswords = allStudents.map(student => {
-        const { password, ...studentData } = student;
+        const { password: _password, ...studentData } = student;
         return studentData;
       });
       resolve({

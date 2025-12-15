@@ -18,7 +18,7 @@ const AdminClassroomManagement = () => {
         } else {
           setError(response.message);
         }
-      } catch (err) {
+      } catch {
         setError('An unexpected error occurred while fetching classroom data.');
       } finally {
         setIsLoading(false);
@@ -77,7 +77,7 @@ const ClassroomSchedule = ({ classroomId }) => {
         } else {
           setError(response.message);
         }
-      } catch (err) {
+      } catch {
         setError('An unexpected error occurred while fetching the schedule.');
       } finally {
         setIsLoading(false);

@@ -24,8 +24,9 @@ const LoginScreen = () => {
         } else if (response.user.role === "admin") {
           // Placeholder for admin dashboard navigation
           navigate(`/admin/dashboard/${response.user.id}`);
+        } else if (response.user.role === "instructor") {
+          navigate(`/instructor/dashboard/${response.user.id}`);
         }
-        // Add instructor navigation later
       } else {
         setError(response.message);
       }
