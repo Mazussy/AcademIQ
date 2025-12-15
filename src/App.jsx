@@ -11,6 +11,10 @@ import AdminStudentList from './components/AdminStudentList';
 import AdminCourseManagement from './components/AdminCourseManagement';
 import AdminUserRegistry from './components/AdminUserRegistry';
 import AdminClassroomManagement from './components/AdminClassroomManagement';
+import InstructorLayout from './components/InstructorLayout';
+import InstructorDashboard from './components/InstructorDashboard';
+import MyClasses from './components/MyClasses';
+import Notifications from './components/Notifications';
 
 
 function App() {
@@ -35,6 +39,13 @@ function App() {
           <Route path="/admin/courses/:adminId" element={<AdminCourseManagement />} />
           <Route path="/admin/users/:adminId" element={<AdminUserRegistry />} />
           <Route path="/admin/classrooms/:adminId" element={<AdminClassroomManagement />} />
+        </Route>
+
+        {/* Instructor Routes with the instructor navbar */}
+        <Route element={<InstructorLayout />}>
+          <Route path="/instructor/dashboard/:instructorId" element={<InstructorDashboard />} />
+          <Route path="/instructor/my-classes/:instructorId" element={<MyClasses />} />
+          <Route path="/instructor/notifications/:instructorId" element={<Notifications />} />
         </Route>
       </Routes>
     </Router>

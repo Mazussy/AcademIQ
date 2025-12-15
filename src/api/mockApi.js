@@ -31,14 +31,30 @@ let users = { // Make users mutable
     password: 'admin',
     role: 'admin',
   },
+  // Instructors
+  I001: {
+    id: 'I001',
+    name: 'Dr. Alan Grant',
+    department: 'Paleontology',
+    office: 'Building A, Room 201',
+    password: 'password',
+    role: 'instructor',
+  },
 };
 
 let courses = [ // Make courses mutable
-    { id: 'CS101', name: 'Introduction to Computer Science', credits: 3 },
-    { id: 'MA201', name: 'Calculus II', credits: 4 },
-    { id: 'PY105', name: 'General Physics I', credits: 4 },
-    { id: 'EN101', name: 'English Composition I', credits: 3 },
+    { id: 'CS101', name: 'Introduction to Computer Science', credits: 3, instructorId: 'I001' },
+    { id: 'MA201', name: 'Calculus II', credits: 4, instructorId: 'I001' },
+    { id: 'PY105', name: 'General Physics I', credits: 4, instructorId: 'I001' },
+    { id: 'EN101', name: 'English Composition I', credits: 3, instructorId: 'I001' },
 ];
+
+const enrollments = {
+  CS101: ['S12345', 'S67890'],
+  MA201: ['S12345'],
+  PY105: ['S12345'],
+  EN101: ['S67890'],
+};
 
 let classrooms = [ // Mock classroom data (merged with availability and assignment)
   { id: 'CR101', name: 'Lecture Hall A', capacity: 100, available: true, assignedTo: null },
@@ -46,6 +62,7 @@ let classrooms = [ // Mock classroom data (merged with availability and assignme
   { id: 'CR201', name: 'Seminar Room 1', capacity: 30, available: false, assignedTo: 'CS101' },
   { id: 'CR202', name: 'Seminar Room 2', capacity: 25, available: true, assignedTo: null },
 ];
+
 
 // Detailed schedule data per classroom
 const classroomSchedules = {
@@ -104,7 +121,7 @@ export const login = (userId, password, role) => {
     setTimeout(() => {
       const user = users[userId];
       if (user && user.password === password && user.role === role) {
-        const { password, ...userData } = user;
+        const { password: _password, ...userData } = user;
         resolve({
           success: true,
           user: userData,
@@ -130,7 +147,7 @@ export const getStudentData = (studentId) => {
     setTimeout(() => {
       const student = users[studentId];
       if (student && student.role === 'student') {
-        const { password, ...studentData } = student;
+        const { password: _password, ...studentData } = student;
         resolve({
           success: true,
           data: studentData,
@@ -155,7 +172,7 @@ export const getAllStudents = () => {
     setTimeout(() => {
       const allStudents = Object.values(users).filter(user => user.role === 'student');
       const studentsWithoutPasswords = allStudents.map(student => {
-        const { password, ...studentData } = student;
+        const { password: _password, ...studentData } = student;
         return studentData;
       });
       resolve({
@@ -374,6 +391,101 @@ export const getClassroomSchedules = (classroomId) => {
           message: 'Schedule not found for this classroom.',
         });
       }
+    }, 500);
+  });
+};
+
+export const getInstructorCourses = (instructorId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const instructorCourses = courses.filter(course => course.instructorId === instructorId);
+      resolve({
+        success: true,
+        data: instructorCourses,
+        message: 'Courses fetched successfully!',
+      });
+    }, 500);
+  });
+};
+
+export const getCourseRoster = (courseId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const studentIds = enrollments[courseId] || [];
+      const roster = studentIds.map(studentId => {
+        const user = users[studentId];
+        return {
+          id: user.id,
+          name: user.name,
+        };
+      });
+      resolve({
+        success: true,
+        data: roster,
+        message: 'Roster fetched successfully!',
+      });
+    }, 500);
+  });
+};
+
+export const getInstructorData = (instructorId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const instructor = users[instructorId];
+      if (instructor && instructor.role === 'instructor') {
+        const { password: _password, ...instructorData } = instructor;
+        resolve({
+          success: true,
+          data: instructorData,
+          message: 'Data fetched successfully!',
+        });
+      } else {
+        resolve({
+          success: false,
+          message: 'Instructor not found.',
+        });
+      }
+    }, 800);
+  });
+};
+
+let notifications = [];
+
+export const sendNotification = (studentId, message) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const student = users[studentId];
+      if (student) {
+        const newNotification = {
+          id: `N${Date.now()}`,
+          studentId,
+          studentName: student.name,
+          message,
+          date: new Date().toISOString(),
+        };
+        notifications.push(newNotification);
+        resolve({
+          success: true,
+          message: 'Notification sent successfully!',
+        });
+      } else {
+        resolve({
+          success: false,
+          message: 'Student not found.',
+        });
+      }
+    }, 500);
+  });
+};
+
+export const getNotifications = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        success: true,
+        data: notifications,
+        message: 'Notifications fetched successfully!',
+      });
     }, 500);
   });
 };
