@@ -24,7 +24,7 @@ const Notifications = () => {
   useEffect(() => {
     if (activeTab === 'view') {
       const fetchNotifications = async () => {
-        const response = await mockApi.getNotifications();
+        const response = await mockApi.getSentNotifications();
         if (response.success) {
           setNotifications(response.data);
         }

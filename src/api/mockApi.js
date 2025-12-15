@@ -239,6 +239,32 @@ export const getAllStudents = () => {
 };
 
 /**
+ * Simulates fetching instructor data from an API.
+ * @param {string} instructorId
+ * @returns {Promise<{success: boolean, data?: object, message: string}>}
+ */
+export const getInstructorData = (instructorId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const instructor = users[instructorId];
+      if (instructor && instructor.role === 'instructor') {
+        const { password: _password, ...instructorData } = instructor;
+        resolve({
+          success: true,
+          data: instructorData,
+          message: 'Data fetched successfully!',
+        });
+      } else {
+        resolve({
+          success: false,
+          message: 'Instructor not found.',
+        });
+      }
+    }, 800); // Simulate network delay
+  });
+};
+
+/**
  * Simulates fetching all instructor data for admin view.
  * @returns {Promise<{success: boolean, data?: object[], message: string}>}
  */
@@ -272,6 +298,51 @@ export const getCourses = () => {
         message: 'Courses fetched successfully!',
       });
     }, 600); // Simulate network delay
+  });
+};
+
+/**
+ * Simulates fetching roster (list of students) for a specific course.
+ * @param {string} courseId
+ * @returns {Promise<{success: boolean, data?: object[], message: string}>}
+ */
+export const getCourseRoster = (courseId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const studentIds = enrollments[courseId] || [];
+      const rosterStudents = studentIds.map(studentId => {
+        const student = users[studentId];
+        if (student) {
+          const { password: _password, ...studentData } = student;
+          return studentData;
+        }
+        return null;
+      }).filter(student => student !== null);
+      
+      resolve({
+        success: true,
+        data: rosterStudents,
+        message: 'Course roster fetched successfully!',
+      });
+    }, 500);
+  });
+};
+
+/**
+ * Simulates fetching courses taught by a specific instructor.
+ * @param {string} instructorId
+ * @returns {Promise<{success: boolean, data?: object[], message: string}>}
+ */
+export const getInstructorCourses = (instructorId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const instructorCourses = courses.filter(course => course.instructorId === instructorId);
+      resolve({
+        success: true,
+        data: instructorCourses,
+        message: 'Instructor courses fetched successfully!',
+      });
+    }, 600);
   });
 };
 
@@ -587,6 +658,67 @@ export const deleteNotification = (userId, notificationId) => {
       } else {
         resolve({ success: false, message: 'User has no notifications.' });
       }
+    }, 300);
+  });
+};
+
+// Mock data for sent notifications (for instructors to view their sent notifications)
+let sentNotifications = [];
+let sentNotificationIdCounter = 1;
+
+/**
+ * Simulates sending a notification to a student.
+ * @param {string} studentId - The student ID to send notification to.
+ * @param {string} message - The notification message.
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export const sendNotification = (studentId, message) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const student = users[studentId];
+      if (student && student.role === 'student') {
+        // Add notification to student's notifications
+        addNotification(studentId, message);
+        
+        // Store in sent notifications for instructor to view
+        const sentNotification = {
+          id: `SN${String(sentNotificationIdCounter++).padStart(3, '0')}`,
+          studentName: student.name,
+          studentId: studentId,
+          message: message,
+          date: new Date().toLocaleDateString(),
+          timestamp: Date.now(),
+        };
+        sentNotifications.push(sentNotification);
+        
+        resolve({
+          success: true,
+          message: 'Notification sent successfully!',
+        });
+      } else {
+        resolve({
+          success: false,
+          message: 'Student not found.',
+        });
+      }
+    }, 500);
+  });
+};
+
+/**
+ * Simulates fetching sent notifications (for instructors).
+ * @returns {Promise<{success: boolean, data?: object[], message: string}>}
+ */
+export const getSentNotifications = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Sort by timestamp, newest first
+      const sorted = [...sentNotifications].sort((a, b) => b.timestamp - a.timestamp);
+      resolve({
+        success: true,
+        data: sorted,
+        message: 'Sent notifications fetched successfully!',
+      });
     }, 300);
   });
 };
