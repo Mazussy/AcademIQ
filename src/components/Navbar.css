@@ -53,6 +53,125 @@
 .navbar-end {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+
+/* Notification Container */
+.notification-container {
+  position: relative;
+}
+
+.notification-bell-button {
+  background-color: transparent;
+  color: #a0a0a0;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.notification-bell-button:hover {
+  background-color: #2a2a2a;
+  color: var(--light-color);
+  transform: none;
+  box-shadow: none;
+}
+
+.bell-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: var(--danger-color);
+  color: var(--light-text-color);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background-color: var(--light-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  max-height: 400px;
+  overflow: hidden;
+  z-index: 1001;
+  border: 1px solid var(--border-color);
+}
+
+.notification-header {
+  padding: 15px 20px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--dark-color);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background-color);
+}
+
+.notification-list {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background-color: var(--background-color);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item.unread {
+  background-color: rgba(42, 111, 71, 0.05);
+}
+
+.notification-item.unread .notification-message {
+  font-weight: 600;
+}
+
+.notification-message {
+  margin: 0 0 5px 0;
+  color: var(--text-color);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #888;
+}
+
+.notification-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
 }
 
 .navbar-item-button {

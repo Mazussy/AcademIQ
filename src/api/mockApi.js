@@ -31,13 +31,54 @@ let users = { // Make users mutable
     password: 'admin',
     role: 'admin',
   },
+  // Instructors
+  I001: {
+    id: 'I001',
+    name: 'Dr. Sarah Johnson',
+    department: 'Computer Science',
+    email: 's.johnson@academiqu.edu',
+    hireYear: 2015,
+    employmentStatus: 'Full-Time',
+    password: 'instructor',
+    role: 'instructor',
+  },
+  I002: {
+    id: 'I002',
+    name: 'Prof. Michael Chen',
+    department: 'Mathematics',
+    email: 'm.chen@academiqu.edu',
+    hireYear: 2018,
+    employmentStatus: 'Full-Time',
+    password: 'instructor',
+    role: 'instructor',
+  },
+  I003: {
+    id: 'I003',
+    name: 'Dr. Emily Rodriguez',
+    department: 'Physics',
+    email: 'e.rodriguez@academiqu.edu',
+    hireYear: 2020,
+    employmentStatus: 'Part-Time',
+    password: 'instructor',
+    role: 'instructor',
+  },
+  I004: {
+    id: 'I004',
+    name: 'Prof. David Williams',
+    department: 'English',
+    email: 'd.williams@academiqu.edu',
+    hireYear: 2012,
+    employmentStatus: 'Full-Time',
+    password: 'instructor',
+    role: 'instructor',
+  },
 };
 
 let courses = [ // Make courses mutable
-    { id: 'CS101', name: 'Introduction to Computer Science', credits: 3 },
-    { id: 'MA201', name: 'Calculus II', credits: 4 },
-    { id: 'PY105', name: 'General Physics I', credits: 4 },
-    { id: 'EN101', name: 'English Composition I', credits: 3 },
+    { id: 'CS101', name: 'Introduction to Computer Science', credits: 3, classroom: 'CR201', instructorId: 'I001', day: 'Sunday', time: '14:00-16:00' },
+    { id: 'MA201', name: 'Calculus II', credits: 4, classroom: 'CR101', instructorId: 'I002', day: 'Sunday', time: '11:00-13:00' },
+    { id: 'PY105', name: 'General Physics I', credits: 4, classroom: 'CR102', instructorId: 'I003', day: 'Monday', time: '11:00-13:00' },
+    { id: 'EN101', name: 'English Composition I', credits: 3, classroom: 'CR101', instructorId: 'I004', day: 'Wednesday', time: '11:00-13:00' },
 ];
 
 let classrooms = [ // Mock classroom data (merged with availability and assignment)
@@ -69,6 +110,28 @@ const classroomSchedules = {
   ],
   CR202: [],
 };
+
+// Notification data - organized by user ID
+let notifications = {
+  // Student notifications
+  S12345: [
+    { id: 'N001', userId: 'S12345', message: 'New assignment posted in Introduction to Computer Science', time: '2 hours ago', read: false, timestamp: Date.now() - 7200000 },
+    { id: 'N002', userId: 'S12345', message: 'Your attendance has been marked for Calculus II', time: '5 hours ago', read: false, timestamp: Date.now() - 18000000 },
+    { id: 'N003', userId: 'S12345', message: 'Grade posted for General Physics I - Midterm Exam', time: '1 day ago', read: true, timestamp: Date.now() - 86400000 },
+  ],
+  S67890: [
+    { id: 'N004', userId: 'S67890', message: 'Reminder: English Composition I class tomorrow at 11:00 AM', time: '3 hours ago', read: false, timestamp: Date.now() - 10800000 },
+  ],
+  // Admin notifications
+  A001: [
+    { id: 'N005', userId: 'A001', message: 'New user registration request pending approval', time: '1 hour ago', read: false, timestamp: Date.now() - 3600000 },
+    { id: 'N006', userId: 'A001', message: 'Course CS101 schedule updated successfully', time: '3 hours ago', read: false, timestamp: Date.now() - 10800000 },
+    { id: 'N007', userId: 'A001', message: 'Classroom CR201 availability changed', time: '6 hours ago', read: true, timestamp: Date.now() - 21600000 },
+  ],
+};
+
+let notificationIdCounter = 8; // For generating new notification IDs
+
 const attendanceData = {
   S12345: {
     overallPercentage: 92,
@@ -162,6 +225,27 @@ export const getAllStudents = () => {
         success: true,
         data: studentsWithoutPasswords,
         message: 'All students fetched successfully!',
+      });
+    }, 700); // Simulate network delay
+  });
+};
+
+/**
+ * Simulates fetching all instructor data for admin view.
+ * @returns {Promise<{success: boolean, data?: object[], message: string}>}
+ */
+export const getAllInstructors = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const allInstructors = Object.values(users).filter(user => user.role === 'instructor');
+      const instructorsWithoutPasswords = allInstructors.map(instructor => {
+        const { password, ...instructorData } = instructor;
+        return instructorData;
+      });
+      resolve({
+        success: true,
+        data: instructorsWithoutPasswords,
+        message: 'All instructors fetched successfully!',
       });
     }, 700); // Simulate network delay
   });
@@ -375,5 +459,126 @@ export const getClassroomSchedules = (classroomId) => {
         });
       }
     }, 500);
+  });
+};
+
+/**
+ * Simulates fetching notifications for a user.
+ * @param {string} userId - The user ID to fetch notifications for.
+ * @returns {Promise<{success: boolean, data?: object[], message: string}>}
+ */
+export const getNotifications = (userId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const userNotifications = notifications[userId] || [];
+      // Sort by timestamp, newest first
+      const sortedNotifications = [...userNotifications].sort((a, b) => b.timestamp - a.timestamp);
+      resolve({
+        success: true,
+        data: sortedNotifications,
+        message: 'Notifications fetched successfully!',
+      });
+    }, 300);
+  });
+};
+
+/**
+ * Simulates marking a notification as read.
+ * @param {string} userId - The user ID.
+ * @param {string} notificationId - The notification ID to mark as read.
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export const markNotificationAsRead = (userId, notificationId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const userNotifications = notifications[userId];
+      if (userNotifications) {
+        const notification = userNotifications.find(n => n.id === notificationId);
+        if (notification) {
+          notification.read = true;
+          resolve({ success: true, message: 'Notification marked as read.' });
+        } else {
+          resolve({ success: false, message: 'Notification not found.' });
+        }
+      } else {
+        resolve({ success: false, message: 'User has no notifications.' });
+      }
+    }, 300);
+  });
+};
+
+/**
+ * Simulates marking all notifications as read for a user.
+ * @param {string} userId - The user ID.
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export const markAllNotificationsAsRead = (userId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const userNotifications = notifications[userId];
+      if (userNotifications) {
+        userNotifications.forEach(n => n.read = true);
+        resolve({ success: true, message: 'All notifications marked as read.' });
+      } else {
+        resolve({ success: false, message: 'User has no notifications.' });
+      }
+    }, 300);
+  });
+};
+
+/**
+ * Simulates adding a new notification for a user.
+ * @param {string} userId - The user ID to add notification for.
+ * @param {string} message - The notification message.
+ * @returns {Promise<{success: boolean, data?: object, message: string}>}
+ */
+export const addNotification = (userId, message) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (!notifications[userId]) {
+        notifications[userId] = [];
+      }
+      
+      const newNotification = {
+        id: `N${String(notificationIdCounter++).padStart(3, '0')}`,
+        userId,
+        message,
+        time: 'Just now',
+        read: false,
+        timestamp: Date.now(),
+      };
+      
+      notifications[userId].unshift(newNotification);
+      
+      resolve({
+        success: true,
+        data: newNotification,
+        message: 'Notification added successfully!',
+      });
+    }, 300);
+  });
+};
+
+/**
+ * Simulates deleting a notification.
+ * @param {string} userId - The user ID.
+ * @param {string} notificationId - The notification ID to delete.
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export const deleteNotification = (userId, notificationId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (notifications[userId]) {
+        const initialLength = notifications[userId].length;
+        notifications[userId] = notifications[userId].filter(n => n.id !== notificationId);
+        if (notifications[userId].length < initialLength) {
+          resolve({ success: true, message: 'Notification deleted successfully!' });
+        } else {
+          resolve({ success: false, message: 'Notification not found.' });
+        }
+      } else {
+        resolve({ success: false, message: 'User has no notifications.' });
+      }
+    }, 300);
   });
 };

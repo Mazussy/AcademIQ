@@ -1,0 +1,44 @@
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.schedule-table thead {
+  background-color: var(--light-grey-color);
+}
+
+.schedule-table th {
+  font-weight: bold;
+  color: var(--dark-color);
+}
+
+.time-slot-header {
+  font-weight: bold;
+  color: var(--dark-grey-color);
+  font-size: 0.9rem;
+}
+
+.schedule-slot-free {
+  color: var(--dark-grey-color);
+  font-style: italic;
+}
+
+.schedule-slot-taken {
+  background-color: var(--primary-light-color);
+  font-weight: bold;
+}
+
+.break-row td {
+  background-color: var(--light-grey-color);
+  font-weight: bold;
+  color: var(--dark-grey-color);
+}

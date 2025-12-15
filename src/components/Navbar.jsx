@@ -1,15 +1,70 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { getNotifications, markNotificationAsRead } from '../api/mockApi';
 import './Navbar.css';
 
 const Navbar = () => {
   const { studentId } = useParams();
   const navigate = useNavigate();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const notificationRef = useRef(null);
+
+  // Fetch notifications on component mount and when studentId changes
+  useEffect(() => {
+    if (studentId) {
+      fetchNotifications();
+    }
+  }, [studentId]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await getNotifications(studentId);
+      if (response.success) {
+        setNotifications(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = () => {
     // In a real app, you'd clear the user's session/token here
     navigate('/login');
   };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  const handleNotificationClick = async (notificationId) => {
+    try {
+      await markNotificationAsRead(studentId, notificationId);
+      // Update local state to reflect the change
+      setNotifications(notifications.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      ));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  // Get count of unread notifications
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <nav className="navbar">
@@ -25,11 +80,54 @@ const Navbar = () => {
         <NavLink to={`/courses/${studentId}`} className="navbar-item">
           Courses
         </NavLink>
+        <NavLink to={`/schedule/${studentId}`} className="navbar-item">
+          My Schedule
+        </NavLink>
         <NavLink to={`/attendance/${studentId}`} className="navbar-item">
           Attendance
         </NavLink>
       </div>
       <div className="navbar-end">
+        <div className="notification-container" ref={notificationRef}>
+          <button 
+            onClick={toggleNotifications} 
+            className="notification-bell-button"
+            aria-label="Notifications"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="currentColor" 
+              className="bell-icon"
+            >
+              <path d="M12 2C11.172 2 10.5 2.672 10.5 3.5V4.1C8.53 4.56 7 6.288 7 8.5V14L5.293 15.707C4.902 16.098 5.184 17 5.793 17H18.207C18.816 17 19.098 16.098 18.707 15.707L17 14V8.5C17 6.288 15.47 4.56 13.5 4.1V3.5C13.5 2.672 12.828 2 12 2ZM10 18C10 19.105 10.895 20 12 20C13.105 20 14 19.105 14 18H10Z"/>
+            </svg>
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount}</span>
+            )}
+          </button>
+          {showNotifications && (
+            <div className="notification-dropdown">
+              <div className="notification-header">Notifications</div>
+              <div className="notification-list">
+                {notifications.length > 0 ? (
+                  notifications.map((notification) => (
+                    <div 
+                      key={notification.id} 
+                      className={`notification-item ${notification.read ? 'read' : 'unread'}`}
+                      onClick={() => handleNotificationClick(notification.id)}
+                    >
+                      <p className="notification-message">{notification.message}</p>
+                      <span className="notification-time">{notification.time}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="notification-empty">You have no notifications</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         <button onClick={handleLogout} className="navbar-item-button">
           Logout
         </button>
