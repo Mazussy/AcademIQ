@@ -25,7 +25,7 @@ const StudentDashboard = () => {
           enrollmentYear: data.enrollmentYear || (data.enrollment_Date ? new Date(data.enrollment_Date).getFullYear() : '—'),
         };
         setStudent(normalized);
-      } catch (err) {
+      } catch {
         setError('An unexpected error occurred while fetching data.');
       } finally {
         setIsLoading(false);
