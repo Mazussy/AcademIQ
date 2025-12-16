@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { registerUser } from '../api/mockApi';
+// TODO: Wire to real registration endpoints if/when needed
 import './AdminUserRegistry.css';
 
 const AdminUserRegistry = () => {
@@ -99,35 +99,11 @@ const AdminUserRegistry = () => {
       }
     }
 
-    const userData = {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      password,
-      role: activeTab,
-      ...(activeTab === 'student' && {
-        majorId,
-        gpa: parseFloat(gpa),
-        academicStatus,
-        enrollmentDate,
-        overallCreditHours: parseInt(overallCreditHours),
-      }),
-      ...(activeTab === 'instructor' && {
-        office,
-        title,
-      }),
-    };
-
     try {
-      const response = await registerUser(userData);
-      if (response.success) {
-        setSuccess(response.message);
-        resetForm();
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
+      // Registration endpoints exist per Swagger, but this form does not match DTOs yet
+      setSuccess('Registration form submitted (connect API when DTOs are finalized).');
+      resetForm();
+    } catch {
       setError('An unexpected error occurred during registration.');
     } finally {
       setIsLoading(false);

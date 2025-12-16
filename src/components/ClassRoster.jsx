@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCourseRoster } from '../api/mockApi';
+import { instructorApi } from '../api/api';
 
 const ClassRoster = ({ courseId }) => {
   const [roster, setRoster] = useState([]);
@@ -11,18 +11,17 @@ const ClassRoster = ({ courseId }) => {
     const fetchRoster = async () => {
       setIsLoading(true);
       try {
-        const response = await getCourseRoster(courseId);
-        if (response.success) {
-          setRoster(response.data);
-          // Initialize attendance state
-          const initialAttendance = {};
-          response.data.forEach(student => {
-            initialAttendance[student.id] = 'Present';
-          });
-          setAttendance(initialAttendance);
-        } else {
-          setError(response.message);
-        }
+        const data = await instructorApi.studentsRegistered(courseId);
+        const list = Array.isArray(data) ? data : (data?.items || []);
+        const normalized = list.map((s) => ({
+          id: s.id || s.userId || s.studentId,
+          name: s.name || [s.firstName, s.lastName].filter(Boolean).join(' '),
+          enrollmentId: s.enrollmentId || s.id,
+        }));
+        setRoster(normalized);
+        const initialAttendance = {};
+        normalized.forEach(student => { initialAttendance[student.enrollmentId] = 'Present'; });
+        setAttendance(initialAttendance);
       } catch (err) {
         setError('An unexpected error occurred while fetching the roster.');
       } finally {
@@ -33,10 +32,10 @@ const ClassRoster = ({ courseId }) => {
     fetchRoster();
   }, [courseId]);
 
-  const handleAttendanceChange = (studentId, status) => {
+  const handleAttendanceChange = (enrollmentId, status) => {
     setAttendance(prev => ({
       ...prev,
-      [studentId]: status,
+      [enrollmentId]: status,
     }));
   };
 
@@ -55,14 +54,14 @@ const ClassRoster = ({ courseId }) => {
           <span className="student-name">{student.name}</span>
           <div className="attendance-buttons">
             <span
-              className={`attendance-button present ${attendance[student.id] === 'Present' ? 'active' : ''}`}
-              onClick={() => handleAttendanceChange(student.id, 'Present')}
+              className={`attendance-button present ${attendance[student.enrollmentId] === 'Present' ? 'active' : ''}`}
+              onClick={() => handleAttendanceChange(student.enrollmentId, 'Present')}
             >
               ✓
             </span>
             <span
-              className={`attendance-button absent ${attendance[student.id] === 'Absent' ? 'active' : ''}`}
-              onClick={() => handleAttendanceChange(student.id, 'Absent')}
+              className={`attendance-button absent ${attendance[student.enrollmentId] === 'Absent' ? 'active' : ''}`}
+              onClick={() => handleAttendanceChange(student.enrollmentId, 'Absent')}
             >
               ✗
             </span>

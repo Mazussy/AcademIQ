@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getInstructorCourses } from '../api/mockApi';
+import { instructorApi } from '../api/api';
 import ClassRoster from './ClassRoster';
 import './CoursesPage.css';
 
@@ -15,12 +15,13 @@ const MyClasses = () => {
     const fetchCourses = async () => {
       setIsLoading(true);
       try {
-        const response = await getInstructorCourses(instructorId);
-        if (response.success) {
-          setCourses(response.data);
-        } else {
-          setError(response.message);
-        }
+        const data = await instructorApi.allCourses();
+        const list = Array.isArray(data) ? data : (data?.items || []);
+        const normalized = list.map((c) => ({
+          id: c.id || c.course_Id || c.code,
+          name: c.name || c.courseName || 'Course',
+        }));
+        setCourses(normalized);
       } catch {
         setError('An unexpected error occurred while fetching courses.');
       } finally {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAllStudents } from "../api/mockApi";
+import { adminApi } from "../api/api";
 import "./AdminStudentList.css";
 
 const AdminStudentList = () => {
@@ -23,13 +23,19 @@ const AdminStudentList = () => {
     const fetchStudents = async () => {
       setIsLoading(true);
       try {
-        const response = await getAllStudents();
-        if (response.success) {
-          setStudents(response.data);
-          setFilteredStudents(response.data);
-        } else {
-          setError(response.message);
-        }
+        const data = await adminApi.allStudents();
+        const list = Array.isArray(data) ? data : (data?.items || []);
+        const normalized = list.map((s) => ({
+          id: s.id || s.userId || s.studentId,
+          name: s.name || [s.firstName, s.lastName].filter(Boolean).join(' '),
+          major: s.major || s.major_Name || s.major_Id || '—',
+          gpa: s.gpa ?? '—',
+          academicStatus: s.academic_Status ?? s.academicStatus ?? '—',
+          overallCreditHours: s.overallCreditsHours ?? s.overallCreditHours ?? '—',
+          enrollmentYear: s.enrollmentYear || (s.enrollment_Date ? new Date(s.enrollment_Date).getFullYear() : '—'),
+        }));
+        setStudents(normalized);
+        setFilteredStudents(normalized);
       } catch (err) {
         setError("An unexpected error occurred while fetching student data.");
       } finally {

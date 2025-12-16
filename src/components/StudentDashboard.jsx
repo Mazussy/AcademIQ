@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStudentData } from '../api/mockApi';
+import { studentApi } from '../api/api';
 import './Dashboard.css';
 
 const StudentDashboard = () => {
@@ -13,12 +13,18 @@ const StudentDashboard = () => {
     const fetchStudent = async () => {
       setIsLoading(true);
       try {
-        const response = await getStudentData(studentId);
-        if (response.success) {
-          setStudent(response.data);
-        } else {
-          setError(response.message);
-        }
+        const data = await studentApi.dashboard();
+        // Normalize display name/fields from possible DTO shapes
+        const normalized = {
+          id: data.id || data.userId || data.studentId || 'me',
+          name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' ') || 'Student',
+          major: data.major || data.major_Name || data.majorId || '—',
+          gpa: data.gpa ?? '—',
+          academicStatus: data.academic_Status ?? data.academicStatus ?? '—',
+          overallCreditHours: data.overallCreditsHours ?? data.overallCreditHours ?? '—',
+          enrollmentYear: data.enrollmentYear || (data.enrollment_Date ? new Date(data.enrollment_Date).getFullYear() : '—'),
+        };
+        setStudent(normalized);
       } catch (err) {
         setError('An unexpected error occurred while fetching data.');
       } finally {
@@ -51,7 +57,7 @@ const StudentDashboard = () => {
           <li><strong>Name:</strong> <span>{student.name}</span></li>
           <li><strong>Major:</strong> <span>{student.major}</span></li>
           <li><strong>GPA:</strong> <span>{student.gpa}</span></li>
-          <li><strong>Academic Status:</strong> <span style={{fontWeight: 'bold', color: student.academicStatus === 'Good Standing' ? 'var(--success-color)' : 'var(--warning-color)'}}>{student.academicStatus}</span></li>
+          <li><strong>Academic Status:</strong> <span style={{fontWeight: 'bold', color: student.academicStatus === 'Good Standing' ? 'var(--success-color)' : 'var(--warning-color)'}}>{String(student.academicStatus)}</span></li>
           <li><strong>Overall Credit Hours:</strong> <span>{student.overallCreditHours}</span></li>
           <li><strong>Enrollment Year:</strong> <span>{student.enrollmentYear}</span></li>
         </ul>

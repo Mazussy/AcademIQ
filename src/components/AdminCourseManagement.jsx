@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCourses, addCourse, updateCourse, deleteCourse } from '../api/mockApi';
+import { adminApi } from '../api/api';
 import './AdminCourseManagement.css';
 
 const AdminCourseManagement = () => {
@@ -26,13 +26,24 @@ const AdminCourseManagement = () => {
   const fetchCourses = async () => {
     setIsLoading(true);
     try {
-      const response = await getCourses();
-      if (response.success) {
-        setCourses(response.data);
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
+      const data = await adminApi.courses();
+      const list = Array.isArray(data) ? data : (data?.items || []);
+      const normalized = list.map((c) => ({
+        id: c.id || c.code,
+        name: c.name || c.courseName || 'Course',
+        credits: c.credits ?? c.credits_Hours ?? '—',
+        instructorId: c.instructor_Id || c.instructorId || '—',
+        classroomId: c.class_Room_Id || c.classroom || '—',
+        semester: c.semester || '',
+        year: c.year || '',
+        day_time: c.day_Time || c.schedule || '',
+        capacity: c.capacity ?? '',
+        enrolled: c.enrolled_Count ?? c.enrolled ?? '',
+        startDate: c.start_Date || c.startDate || '',
+        endDate: c.end_Date || c.endDate || '',
+      }));
+      setCourses(normalized);
+    } catch {
       setError('An unexpected error occurred while fetching courses.');
     } finally {
       setIsLoading(false);
@@ -80,14 +91,9 @@ const AdminCourseManagement = () => {
   const handleDeleteClick = async (courseId) => {
     if (window.confirm(`Are you sure you want to delete course ${courseId}?`)) {
       try {
-        const response = await deleteCourse(courseId);
-        if (response.success) {
-          alert(response.message);
-          fetchCourses(); // Refresh list
-        } else {
-          setError(response.message);
-        }
-      } catch (err) {
+        await adminApi.deleteCourse(courseId);
+        fetchCourses(); // Refresh list
+      } catch {
         setError('Error deleting course.');
       }
     }
@@ -111,21 +117,14 @@ const AdminCourseManagement = () => {
     };
 
     try {
-      let response;
       if (currentCourse) {
-        response = await updateCourse(courseData);
+        await adminApi.editCourse(courseData.id, { newCourse: { code: courseData.id, name: courseData.name, credits: courseData.credits } });
       } else {
-        response = await addCourse(courseData);
+        await adminApi.addCourse({ newCourse: { code: courseData.id, name: courseData.name, credits: courseData.credits } });
       }
-
-      if (response.success) {
-        alert(response.message);
-        setShowModal(false);
-        fetchCourses(); // Refresh list
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
+      setShowModal(false);
+      fetchCourses();
+    } catch {
       setError('Error saving course.');
     }
   };

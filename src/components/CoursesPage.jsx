@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCourses } from '../api/mockApi';
+import { enrollmentApi } from '../api/api';
 import './CoursesPage.css';
 
 const CoursesPage = () => {
@@ -13,12 +13,22 @@ const CoursesPage = () => {
     const fetchCourses = async () => {
       setIsLoading(true);
       try {
-        const response = await getCourses();
-        if (response.success) {
-          setAvailableCourses(response.data);
-        } else {
-          setError(response.message);
-        }
+        const [available, enrolled] = await Promise.all([
+          enrollmentApi.availableOfferings(),
+          enrollmentApi.myEnrollments(),
+        ]);
+        const toCourse = (c) => ({
+          id: c.id || c.course_Id || c.courseId || c.code || 'N/A',
+          name: c.name || c.courseName || 'Course',
+          credits: c.credits ?? c.credits_Hours ?? '—',
+          classroom: c.class_RoomName || c.class_Room_Id || c.classroom || '—',
+          instructorId: c.instructor_Id || c.instructorId || '—',
+          day: c.day || undefined,
+          time: c.time || undefined,
+          day_time: c.day_Time || c.schedule,
+        });
+        setAvailableCourses((Array.isArray(available) ? available : available?.items || []).map(toCourse));
+        setEnrolledCourses((Array.isArray(enrolled) ? enrolled : enrolled?.items || []).map(toCourse));
       } catch (err) {
         setError('An unexpected error occurred while fetching courses.');
       } finally {
@@ -33,25 +43,33 @@ const CoursesPage = () => {
     setExpandedCourse(expandedCourse === courseId ? null : courseId);
   };
 
-  const handleEnroll = (e, courseId) => {
+  const handleEnroll = async (e, courseId) => {
     e.stopPropagation();
-    const courseToEnroll = availableCourses.find(course => course.id === courseId);
-    
-    if (courseToEnroll) {
-      setAvailableCourses(availableCourses.filter(course => course.id !== courseId));
-      setEnrolledCourses([...enrolledCourses, courseToEnroll]);
-      setExpandedCourse(null);
+    try {
+      await enrollmentApi.registerCourse(courseId);
+      const courseToEnroll = availableCourses.find(course => course.id === courseId);
+      if (courseToEnroll) {
+        setAvailableCourses(availableCourses.filter(course => course.id !== courseId));
+        setEnrolledCourses([...enrolledCourses, courseToEnroll]);
+        setExpandedCourse(null);
+      }
+    } catch {
+      setError('Failed to enroll in course.');
     }
   };
 
-  const handleUnenroll = (e, courseId) => {
+  const handleUnenroll = async (e, courseId) => {
     e.stopPropagation();
-    const courseToUnenroll = enrolledCourses.find(course => course.id === courseId);
-    
-    if (courseToUnenroll) {
-      setEnrolledCourses(enrolledCourses.filter(course => course.id !== courseId));
-      setAvailableCourses([...availableCourses, courseToUnenroll]);
-      setExpandedCourse(null);
+    try {
+      await enrollmentApi.deleteRegisteredCourse(courseId);
+      const courseToUnenroll = enrolledCourses.find(course => course.id === courseId);
+      if (courseToUnenroll) {
+        setEnrolledCourses(enrolledCourses.filter(course => course.id !== courseId));
+        setAvailableCourses([...availableCourses, courseToUnenroll]);
+        setExpandedCourse(null);
+      }
+    } catch {
+      setError('Failed to unenroll from course.');
     }
   };
 
@@ -84,8 +102,7 @@ const CoursesPage = () => {
                   <p><strong>Credits:</strong> {course.credits}</p>
                   <p><strong>Classroom:</strong> {course.classroom}</p>
                   <p><strong>Instructor ID:</strong> {course.instructorId}</p>
-                  <p><strong>Day:</strong> {course.day}</p>
-                  <p><strong>Time:</strong> {course.time}</p>
+                  <p><strong>Schedule:</strong> {course.day_time || `${course.day || ''} ${course.time || ''}`}</p>
                   <button onClick={(e) => handleEnroll(e, course.id)}>Enroll</button>
                 </div>
               </div>
@@ -111,8 +128,7 @@ const CoursesPage = () => {
                   <p><strong>Credits:</strong> {course.credits}</p>
                   <p><strong>Classroom:</strong> {course.classroom}</p>
                   <p><strong>Instructor ID:</strong> {course.instructorId}</p>
-                  <p><strong>Day:</strong> {course.day}</p>
-                  <p><strong>Time:</strong> {course.time}</p>
+                  <p><strong>Schedule:</strong> {course.day_time || `${course.day || ''} ${course.time || ''}`}</p>
                   <button className="unenroll-btn" onClick={(e) => handleUnenroll(e, course.id)}>Unenroll</button>
                 </div>
               </div>

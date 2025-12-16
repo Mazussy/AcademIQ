@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getInstructorData } from '../api/mockApi';
+import { instructorApi } from '../api/api';
 import './Dashboard.css';
 
 const InstructorDashboard = () => {
@@ -13,12 +13,14 @@ const InstructorDashboard = () => {
     const fetchInstructor = async () => {
       setIsLoading(true);
       try {
-        const response = await getInstructorData(instructorId);
-        if (response.success) {
-          setInstructor(response.data);
-        } else {
-          setError(response.message);
-        }
+        const data = await instructorApi.info();
+        const normalized = {
+          id: data.id || data.user_Id || 'me',
+          name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' ') || 'Instructor',
+          department: data.department || data.departmnet_Name || data.departmnet_Id || '—',
+          office: data.office || '—',
+        };
+        setInstructor(normalized);
       } catch (err) {
         setError('An unexpected error occurred while fetching data.');
       } finally {

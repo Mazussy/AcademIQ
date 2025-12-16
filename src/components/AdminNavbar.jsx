@@ -1,32 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { getNotifications, markNotificationAsRead } from '../api/mockApi';
+import { logout as apiLogout } from '../api/api';
 import './Navbar.css'; // Reusing the existing Navbar CSS
 
 const AdminNavbar = () => {
   const { adminId } = useParams(); // Assuming admin routes will have an adminId
   const navigate = useNavigate();
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [showNotifications] = useState(false);
   const notificationRef = useRef(null);
 
   // Fetch notifications on component mount and when adminId changes
-  useEffect(() => {
-    if (adminId) {
-      fetchNotifications();
-    }
-  }, [adminId]);
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await getNotifications(adminId);
-      if (response.success) {
-        setNotifications(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
-  };
+  useEffect(() => {}, [adminId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -42,28 +26,15 @@ const AdminNavbar = () => {
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try { await apiLogout(); } catch {}
     navigate('/login');
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
-
-  const handleNotificationClick = async (notificationId) => {
-    try {
-      await markNotificationAsRead(adminId, notificationId);
-      // Update local state to reflect the change
-      setNotifications(notifications.map(n => 
-        n.id === notificationId ? { ...n, read: true } : n
-      ));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
-  };
+  const toggleNotifications = () => {};
 
   // Get count of unread notifications
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = 0;
 
   return (
     <nav className="navbar">
@@ -108,27 +79,7 @@ const AdminNavbar = () => {
               <span className="notification-badge">{unreadCount}</span>
             )}
           </button>
-          {showNotifications && (
-            <div className="notification-dropdown">
-              <div className="notification-header">Notifications</div>
-              <div className="notification-list">
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <div 
-                      key={notification.id} 
-                      className={`notification-item ${notification.read ? 'read' : 'unread'}`}
-                      onClick={() => handleNotificationClick(notification.id)}
-                    >
-                      <p className="notification-message">{notification.message}</p>
-                      <span className="notification-time">{notification.time}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="notification-empty">You have no notifications</div>
-                )}
-              </div>
-            </div>
-          )}
+          {false}
         </div>
         <button onClick={handleLogout} className="navbar-item-button">
           Logout

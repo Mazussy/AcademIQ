@@ -1,78 +1,9 @@
-// Simulate a database of users
-let users = { // Make users mutable
-  // Students
-  S12345: {
-    id: 'S12345',
-    name: 'John Doe',
-    major: 'Computer Science',
-    gpa: 3.8,
-    academicStatus: 'Good Standing',
-    overallCreditHours: 90,
-    enrollmentYear: 2022,
-    password: 'password',
-    role: 'student',
-  },
-  S67890: {
-    id: 'S67890',
-    name: 'Jane Smith',
-    major: 'Software Engineering',
-    gpa: 3.9,
-    academicStatus: 'Excellent',
-    overallCreditHours: 120,
-    enrollmentYear: 2021,
-    password: 'password123',
-    role: 'student',
-  },
-  // Admins
-  A001: {
-    id: 'A001',
-    name: 'Dr. Evelyn Reed',
-    email: 'e.reed@academiqu.edu',
-    password: 'admin',
-    role: 'admin',
-  },
-  // Instructors
-  I001: {
-    id: 'I001',
-    name: 'Dr. Sarah Johnson',
-    department: 'Computer Science',
-    email: 's.johnson@academiqu.edu',
-    hireYear: 2015,
-    employmentStatus: 'Full-Time',
-    password: 'instructor',
-    role: 'instructor',
-  },
-  I002: {
-    id: 'I002',
-    name: 'Prof. Michael Chen',
-    department: 'Mathematics',
-    email: 'm.chen@academiqu.edu',
-    hireYear: 2018,
-    employmentStatus: 'Full-Time',
-    password: 'instructor',
-    role: 'instructor',
-  },
-  I003: {
-    id: 'I003',
-    name: 'Dr. Emily Rodriguez',
-    department: 'Physics',
-    email: 'e.rodriguez@academiqu.edu',
-    hireYear: 2020,
-    employmentStatus: 'Part-Time',
-    password: 'instructor',
-    role: 'instructor',
-  },
-  I004: {
-    id: 'I004',
-    name: 'Prof. David Williams',
-    department: 'English',
-    email: 'd.williams@academiqu.edu',
-    hireYear: 2012,
-    employmentStatus: 'Full-Time',
-    password: 'instructor',
-    role: 'instructor',
-  },
-};
+// Mock API removed. This file is intentionally left as a stub.
+export {};
+// Deprecated: mock API removed. Intentionally left minimal to avoid imports.
+export {};
+// Legacy content retained as raw string to avoid parsing
+const __DEAD = String.raw`
 
 let courses = [ // Make courses mutable
     { id: 'CS101', name: 'Introduction to Computer Science', credits: 3, classroom: 'CR201', instructorId: 'I001', day: 'Sunday', time: '14:00-16:00' },
@@ -722,3 +653,5 @@ export const getSentNotifications = () => {
     }, 300);
   });
 };
+
+`;

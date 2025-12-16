@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAllInstructors } from "../api/mockApi";
+import { adminApi } from "../api/api";
 import "./AdminInstructorList.css";
 
 const AdminInstructorList = () => {
@@ -22,13 +22,18 @@ const AdminInstructorList = () => {
     const fetchInstructors = async () => {
       setIsLoading(true);
       try {
-        const response = await getAllInstructors();
-        if (response.success) {
-          setInstructors(response.data);
-          setFilteredInstructors(response.data);
-        } else {
-          setError(response.message);
-        }
+        const data = await adminApi.allInstructors();
+        const list = Array.isArray(data) ? data : (data?.items || []);
+        const normalized = list.map((i) => ({
+          id: i.id || i.user_Id || i.instructorId,
+          name: i.name || [i.firstName, i.lastName].filter(Boolean).join(' '),
+          department: i.department || i.departmnet_Name || i.departmnet_Id || '—',
+          email: i.email || '—',
+          employmentStatus: i.employmentStatus || i.status || '—',
+          hireYear: i.hireYear || '—',
+        }));
+        setInstructors(normalized);
+        setFilteredInstructors(normalized);
       } catch (err) {
         setError("An unexpected error occurred while fetching instructor data.");
       } finally {

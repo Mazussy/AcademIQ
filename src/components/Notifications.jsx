@@ -1,36 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import * as mockApi from '../api/mockApi';
+import { instructorApi } from '../api/api';
 import './Notifications.css';
 
 const Notifications = () => {
   const [activeTab, setActiveTab] = useState('send'); // 'send' or 'view'
+  const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      const response = await mockApi.getAllStudents();
-      if (response.success) {
-        setStudents(response.data);
+    const fetchCourses = async () => {
+      try {
+        const data = await instructorApi.allCourses();
+        const list = Array.isArray(data) ? data : (data?.items || []);
+        setCourses(list.map((c) => ({ id: c.id || c.course_Id, name: c.courseName || c.name })));
+      } catch {
+        // ignore for now
       }
     };
-    fetchStudents();
+    fetchCourses();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'view') {
-      const fetchNotifications = async () => {
-        const response = await mockApi.getSentNotifications();
-        if (response.success) {
-          setNotifications(response.data);
-        }
-      };
-      fetchNotifications();
-    }
+    // No sent notifications endpoint provided; keep section empty
   }, [activeTab]);
 
   const openModal = (student) => {
@@ -46,19 +43,32 @@ const Notifications = () => {
 
   const handleSendNotification = async () => {
     if (selectedStudent && notificationMessage) {
-      const response = await mockApi.sendNotification(selectedStudent.id, notificationMessage);
-      if (response.success) {
+      try {
+        await instructorApi.sendNotification({ student_Id: selectedStudent.id, message: notificationMessage });
         alert('Notification sent successfully!');
         closeModal();
-      } else {
+      } catch {
         alert('Failed to send notification.');
       }
     }
   };
 
   const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (student.name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleCourseChange = async (e) => {
+    const id = e.target.value;
+    setSelectedCourse(id);
+    if (!id) { setStudents([]); return; }
+    try {
+      const data = await instructorApi.studentsRegistered(id);
+      const list = Array.isArray(data) ? data : (data?.items || []);
+      setStudents(list.map((s) => ({ id: s.id || s.userId || s.studentId, name: s.name || [s.firstName, s.lastName].filter(Boolean).join(' ') })));
+    } catch {
+      setStudents([]);
+    }
+  };
 
   return (
     <div className="page-container notifications-container">
@@ -81,6 +91,12 @@ const Notifications = () => {
 
       {activeTab === 'send' ? (
         <div className="send-section">
+          <select value={selectedCourse || ''} onChange={handleCourseChange} className="search-bar">
+            <option value="">Select a course to load students…</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>{c.name || c.id}</option>
+            ))}
+          </select>
           <input
             type="text"
             placeholder="Search for a student..."

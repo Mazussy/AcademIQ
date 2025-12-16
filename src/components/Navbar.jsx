@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { getNotifications, markNotificationAsRead } from '../api/mockApi';
+import { studentApi, logout as apiLogout } from '../api/api';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -12,17 +12,21 @@ const Navbar = () => {
 
   // Fetch notifications on component mount and when studentId changes
   useEffect(() => {
-    if (studentId) {
-      fetchNotifications();
-    }
+    fetchNotifications();
   }, [studentId]);
 
   const fetchNotifications = async () => {
     try {
-      const response = await getNotifications(studentId);
-      if (response.success) {
-        setNotifications(response.data);
-      }
+      const data = await studentApi.notifications();
+      // Expect an array; normalize keys
+      const list = Array.isArray(data) ? data : (data?.items || []);
+      const normalized = list.map((n, idx) => ({
+        id: n.id || String(idx),
+        message: n.message || n.title || 'Notification',
+        time: n.time || n.timestamp || '',
+        read: n.read ?? false,
+      }));
+      setNotifications(normalized);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -42,8 +46,8 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    // In a real app, you'd clear the user's session/token here
+  const handleLogout = async () => {
+    try { await apiLogout(); } catch {}
     navigate('/login');
   };
 
@@ -52,15 +56,10 @@ const Navbar = () => {
   };
 
   const handleNotificationClick = async (notificationId) => {
-    try {
-      await markNotificationAsRead(studentId, notificationId);
-      // Update local state to reflect the change
-      setNotifications(notifications.map(n => 
-        n.id === notificationId ? { ...n, read: true } : n
-      ));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
+    // No mark-as-read endpoint exposed for students; update local state only
+    setNotifications(notifications.map(n => (
+      n.id === notificationId ? { ...n, read: true } : n
+    )));
   };
 
   // Get count of unread notifications

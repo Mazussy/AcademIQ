@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getCourses } from '../api/mockApi';
+import { studentApi } from '../api/api';
 import './MySchedule.css';
 
 const MySchedule = () => {
@@ -10,42 +10,25 @@ const MySchedule = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    setIsLoading(true);
-    try {
-      // Create placeholder courses with random days and times
-      const placeholderCourses = [
-        {
-          courseCode: 'CS101',
-          days: 'Monday, Wednesday',
-          time: '09:00-11:00'
-        },
-        {
-          courseCode: 'MATH201',
-          days: 'Tuesday, Thursday',
-          time: '11:00-13:00'
-        },
-        {
-          courseCode: 'ENG102',
-          days: 'Monday, Wednesday',
-          time: '14:00-16:00'
-        },
-        {
-          courseCode: 'PHY150',
-          days: 'Tuesday',
-          time: '16:00-18:00'
-        },
-        {
-          courseCode: 'HIST301',
-          days: 'Thursday',
-          time: '14:00-16:00'
-        }
-      ];
-      setEnrolledCourses(placeholderCourses);
-    } catch (err) {
-      setError('An unexpected error occurred while fetching courses.');
-    } finally {
-      setIsLoading(false);
-    }
+    const fetchSchedule = async () => {
+      setIsLoading(true);
+      try {
+        const data = await studentApi.schedule();
+        // Expect list of course schedule items; normalize to {courseCode, days, time}
+        const list = Array.isArray(data) ? data : (data?.items || []);
+        const mapped = list.map((x) => ({
+          courseCode: x.courseCode || x.courseName || x.code || 'Course',
+          days: x.days || x.day || x.day_Time?.split(' ')[0] || '',
+          time: x.time || x.day_Time?.split(' ').slice(1).join(' ') || '',
+        }));
+        setEnrolledCourses(mapped);
+      } catch (err) {
+        setError('An unexpected error occurred while fetching courses.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSchedule();
   }, [studentId]);
 
   if (isLoading) {
