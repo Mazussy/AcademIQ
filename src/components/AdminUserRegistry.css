@@ -1,13 +1,7 @@
-.register-tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-  position: relative;
-}
-
+/* Admin User Registry Specific Styles */
 .centered-container {
-  padding-top: 60px !important;
-  padding-bottom: 60px !important;
+  padding-top: clamp(2rem, 5vw, 3.75rem) !important;
+  padding-bottom: clamp(2rem, 5vw, 3.75rem) !important;
   min-height: calc(100vh - 80px) !important;
   height: 100% !important;
   justify-content: flex-start !important;
@@ -17,13 +11,18 @@
 }
 
 .centered-container .card {
-  max-width: 520px;
-  padding: 70px 70px 0 70px;
-  transform: scale(1.15);
-  transform-origin: center;
-  margin-top: 40px;
-  margin-bottom: 60px;
+  max-width: min(90vw, 600px);
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  box-sizing: border-box;
+  margin-top: clamp(1rem, 3vw, 2.5rem);
+  margin-bottom: clamp(2rem, 5vw, 3.75rem);
   flex-shrink: 0;
+}
+
+.centered-container .card h1 {
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
 .centered-container .card form {
@@ -31,7 +30,8 @@
 }
 
 .centered-container .card > p {
-  padding-bottom: 20px;
+  padding-bottom: clamp(1rem, 2vw, 1.25rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 /* Ensure parent main extends to viewport */
@@ -44,8 +44,9 @@ main:has(.centered-container) {
 .register-tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 40px;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
   position: relative;
+  gap: 0.25rem;
 }
 
 .tab-underline {
@@ -58,18 +59,18 @@ main:has(.centered-container) {
 }
 
 .register-tab {
-  padding: 12px 25px;
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 3vw, 1.5rem);
   cursor: pointer;
   background-color: transparent;
   background-image: none;
   border: none;
-  font-size: 1.05rem;
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
   color: #555555;
   position: relative;
   transition: color 0.3s, background-color 0.3s;
-  margin: 0 5px;
   font-weight: 500;
   box-shadow: none;
+  white-space: nowrap;
 }
 
 .register-tab:hover {
@@ -88,7 +89,9 @@ main:has(.centered-container) {
   background-color: #1e201e !important;
   background-image: none !important;
   box-shadow: none !important;
-  margin-bottom: 5px !important;
+  margin-bottom: 0.375rem !important;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 3vw, 2rem) !important;
+  font-size: clamp(0.95rem, 2vw, 1.05rem) !important;
 }
 
 .register-button:hover {
@@ -97,28 +100,29 @@ main:has(.centered-container) {
   transform: translateY(-2px);
 }
 
+/* Form Styles */
 form {
   margin-bottom: 0 !important;
-  padding-bottom: 15px !important;
+  padding-bottom: clamp(0.75rem, 2vw, 1rem) !important;
 }
 
 form label {
   display: block;
-  margin-bottom: 15px;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
   text-align: left;
   font-weight: 500;
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
-/* Remove margin from last label before button */
 form label:last-of-type {
-  margin-bottom: 15px;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
 }
 
-/* Remove extra space after button */
 form button:last-child {
   margin-bottom: 0 !important;
 }
 
+/* Input Styles */
 form label input[type="text"],
 form label input[type="password"],
 form label input[type="email"],
@@ -127,13 +131,30 @@ form label input[type="number"],
 form label input[type="date"] {
   display: block !important;
   width: 100% !important;
-  margin-top: 5px !important;
+  margin-top: 0.375rem !important;
   margin-bottom: 0 !important;
-  padding: 14px;
+  padding: clamp(0.75rem, 2vw, 0.875rem);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-sizing: border-box;
   transition: border-color 0.3s, box-shadow 0.3s;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+}
+
+/* Match modal dropdown styling for selects */
+form label select {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 0.375rem !important;
+  margin-bottom: 0 !important;
+  padding: clamp(0.75rem, 2vw, 0.875rem);
+  border: 1px solid var(--border-color);
+  border-radius: 6px; /* align with modal */
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: #fff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
 input[type="text"]:focus,
@@ -144,4 +165,35 @@ input[type="number"]:focus,
 input[type="date"]:focus {
   border-color: #1e201e !important;
   box-shadow: 0 0 0 3px rgba(30, 32, 30, 0.1) !important;
+  outline: none;
+}
+
+form label select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(42, 111, 71, 0.1);
+}
+
+/* Responsive Grid for Student Fields */
+@media (min-width: 768px) {
+  form label input[type="number"],
+  form label input[type="date"] {
+    max-width: 100%;
+  }
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 480px) {
+  .centered-container .card {
+    padding: 1.5rem;
+  }
+
+  .register-tabs {
+    gap: 0.125rem;
+  }
+
+  .register-tab {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.85rem;
+  }
 }

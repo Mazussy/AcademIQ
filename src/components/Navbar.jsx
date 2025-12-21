@@ -1,14 +1,17 @@
-import React from 'react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import './Navbar.css';
+import React from "react";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { logout as apiLogout } from "../api/api";
+import "./Navbar.css";
 
 const Navbar = () => {
   const { studentId } = useParams();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // In a real app, you'd clear the user's session/token here
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+    } catch {}
+    navigate("/login");
   };
 
   return (
@@ -24,6 +27,9 @@ const Navbar = () => {
         </NavLink>
         <NavLink to={`/courses/${studentId}`} className="navbar-item">
           Courses
+        </NavLink>
+        <NavLink to={`/schedule/${studentId}`} className="navbar-item">
+          My Schedule
         </NavLink>
         <NavLink to={`/attendance/${studentId}`} className="navbar-item">
           Attendance

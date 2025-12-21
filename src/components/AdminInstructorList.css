@@ -1,0 +1,261 @@
+.admin-list-container {
+  padding: 20px;
+}
+
+.admin-list-container h1 {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(42, 111, 71, 0.1);
+}
+
+.instructor-list-item {
+  background-color: var(--light-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.instructor-info {
+  text-align: left;
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.instructor-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--dark-color);
+}
+
+.instructor-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.instructor-actions button {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 5px;
+  box-shadow: none; /* Override global button shadow */
+  background-image: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.instructor-actions .edit-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.instructor-actions .edit-button:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.instructor-actions .delete-button {
+  background-color: #1e201e;
+  color: white;
+}
+
+.instructor-actions .delete-button:hover {
+  background-color: #0a0a0a;
+}
+
+.arrow {
+  transition: transform 0.3s;
+  font-size: 1.2rem;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.instructor-details {
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out,
+    border 0.4s ease-in-out;
+  padding: 0;
+  text-align: left;
+  margin: 0;
+  border: none;
+  display: none;
+}
+
+.instructor-details.expanded {
+  max-height: 300px; /* Adjust as needed */
+  padding: 20px 0 0 0;
+  margin: 15px 0 0 0;
+  display: block;
+}
+
+.instructor-details p {
+  margin: 0 0 10px;
+}
+
+.instructor-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instructor-details li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.instructor-details li:last-child {
+  border-bottom: none;
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--light-color);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: var(--dark-color);
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+.modal-content input,
+.modal-content select {
+  padding: 12px;
+  margin-top: 6px;
+  margin-bottom: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(42, 111, 71, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.form-actions button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  box-shadow: none; /* Override global button shadow */
+  background-image: none;
+}
+
+.form-actions button[type="submit"] {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.form-actions .cancel-button {
+  background-color: #e0e0e0;
+  color: var(--dark-color);
+}
+
+.form-actions .cancel-button:hover {
+  background-color: #d0d0d0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .instructor-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .instructor-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  .modal-content {
+    padding: 20px;
+    width: 95%;
+  }
+}

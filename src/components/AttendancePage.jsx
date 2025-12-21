@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getAttendanceData } from '../api/mockApi';
+import { studentApi } from '../api/api';
 import './AttendancePage.css';
 
 const AttendancePage = () => {
@@ -14,12 +14,13 @@ const AttendancePage = () => {
     const fetchAttendance = async () => {
       setIsLoading(true);
       try {
-        const response = await getAttendanceData(studentId);
-        if (response.success) {
-          setAttendanceData(response.data);
-        } else {
-          setError(response.message);
-        }
+        // NOTE: User requested this endpoint for attendance pending API readiness
+        const data = await studentApi.attendance();
+        // Try to normalize to existing shape if possible
+        const normalized = Array.isArray(data)
+          ? { overallPercentage: 0, courses: [] }
+          : data;
+        setAttendanceData(normalized);
       } catch (err) {
         setError('An unexpected error occurred while fetching attendance data.');
       } finally {

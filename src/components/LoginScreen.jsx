@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/mockApi";
+import { login } from "../api/api";
 import "./LoginScreen.css";
 
 const LoginScreen = () => {
   const [activeTab, setActiveTab] = useState("student"); // 'student', 'admin', 'instructor'
-  const [userId, setUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -17,19 +17,21 @@ const LoginScreen = () => {
     setIsLoading(true);
 
     try {
-      const response = await login(userId, password, activeTab);
+      const response = await login(email, password);
       if (response.success) {
-        if (response.user.role === "student") {
-          navigate(`/dashboard/${response.user.id}`);
-        } else if (response.user.role === "admin") {
-          // Placeholder for admin dashboard navigation
-          navigate(`/admin/dashboard/${response.user.id}`);
+        // We still use the role tab to decide where to go.
+        if (activeTab === "student") {
+          // ID will be resolved by pages using token; keep placeholder in URL
+          navigate(`/dashboard/me`);
+        } else if (activeTab === "admin") {
+          navigate(`/admin/dashboard/admin`);
+        } else if (activeTab === "instructor") {
+          navigate(`/instructor/dashboard/me`);
         }
-        // Add instructor navigation later
       } else {
-        setError(response.message);
+        setError("Invalid credentials.");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -37,18 +39,17 @@ const LoginScreen = () => {
   };
 
   const renderForm = () => {
-    const idLabel = activeTab === "student" ? "Student ID" : "User ID";
-    const idPlaceholder =
-      activeTab === "student" ? "e.g., S12345" : "e.g., A001";
+    const idLabel = "Email";
+    const idPlaceholder = "your@email.com";
 
     return (
       <form onSubmit={handleLogin}>
         <label>
           {idLabel}:
           <input
-            type="text"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
             placeholder={idPlaceholder}
           />
@@ -75,11 +76,7 @@ const LoginScreen = () => {
     );
   };
 
-  const getTabIndex = () => {
-    if (activeTab === "student") return 0;
-    if (activeTab === "admin") return 1;
-    return 2;
-  };
+  // no-op helper removed
 
   const tabRefs = React.useRef({
     student: null,

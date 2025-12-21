@@ -371,3 +371,88 @@
 .student-details li:last-child {
   border-bottom: none;
 }
+/* Course item styling (matching CoursesPage) */
+.course-item {
+  background-color: var(--light-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: box-shadow 0.3s;
+}
+
+.course-item:hover {
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.course-header {
+  padding: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  flex: 1;
+}
+
+.course-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.course-header-actions .edit-button,
+.course-header-actions .delete-button {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 5px;
+  box-shadow: none;
+  background-image: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color: white;
+}
+
+.course-header-actions .edit-button {
+  background-color: var(--primary-color);
+}
+
+.course-header-actions .edit-button:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.course-header-actions .delete-button {
+  background-color: #1e201e;
+}
+
+.course-header-actions .delete-button:hover {
+  background-color: #0a0a0a;
+}
+
+.course-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+  padding: 0 20px;
+}
+
+.course-details.expanded {
+  max-height: 1000px;
+  padding: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.course-details p {
+  margin: 8px 0;
+  color: var(--text-color);
+}
+
+.course-details p strong {
+  color: var(--dark-color);
+}
