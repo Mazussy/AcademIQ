@@ -31,13 +31,11 @@ export async function login(email, password) {
     const payload = variants[i];
     try {
       if (debug) {
-        // eslint-disable-next-line no-console
         console.debug('[auth] login variant', i + 1, Object.keys(payload));
       }
       const resp = await http.post('/api/identity/Account/Login', payload);
       const token = extractToken(resp);
       if (!token) {
-        // eslint-disable-next-line no-console
         console.warn('[auth] Login response without token; response shape:', resp);
         // Some backends set auth via cookie; accept success without token
         setToken('');
@@ -48,7 +46,6 @@ export async function login(email, password) {
     } catch (err) {
       lastErr = err;
       if (debug) {
-        // eslint-disable-next-line no-console
         console.debug('[auth] variant failed', i + 1, { status: err?.status, data: err?.data });
       }
       // Try next variant for server errors or bad request binding
@@ -102,8 +99,44 @@ export const adminApi = {
   classrooms: async () => http.get('/api/admin/ClassRoom/AllClassRooms'),
   allStudents: async () => http.get('/api/admin/User/GetAllStudent'),
   allInstructors: async () => http.get('/api/admin/User/GetAllInstructor'),
+  editStudent: async (studentDTO) => http.put('/api/admin/User/EditStudent', studentDTO),
+  editInstructor: async (instructorDTO) => http.put('/api/admin/User/EditInstructor', instructorDTO),
+  lockUnlockStudent: async (id) => http.put(`/api/admin/User/LockUnLockStudent/${id}`),
+  lockUnlockInstructor: async (id) => http.put(`/api/admin/User/LockUnLockInstructor/${id}`),
+  deleteStudent: async (id) => http.del(`/api/admin/User/DeleteStudent/${id}`),
+  deleteInstructor: async (id) => http.del(`/api/admin/User/DeleteInstructor/${id}`),
+  majors: async () => http.get('/api/admin/Major'),
+  // Try common department endpoints to improve compatibility with backend variations
+  departments: async () => {
+    const candidates = [
+      '/api/admin/Department',
+      '/api/admin/Department/AllDepartments',
+      '/api/admin/Departments',
+      '/api/admin/Department/GetAll',
+    ];
+    let lastErr;
+    for (const path of candidates) {
+      try {
+        const res = await http.get(path);
+        return res;
+      } catch (err) {
+        lastErr = err;
+        continue;
+      }
+    }
+    throw lastErr || new Error('Departments fetch failed');
+  },
   courses: async () => http.get('/api/admin/Course/AllCourses'),
   addCourse: async (courseDTO) => http.post('/api/admin/Course/AddCourse', courseDTO),
   editCourse: async (id, courseDTO) => http.put(`/api/admin/Course/EditCourse?Id=${encodeURIComponent(id)}`, courseDTO),
   deleteCourse: async (id) => http.del(`/api/admin/Course/DeleteCourse/${id}`),
+};
+
+// Admin - Registration
+export const registerApi = {
+  registerStudent: async (studentDTO) => http.post('/api/identity/Account/RegisterStudent', studentDTO),
+  registerInstructor: async (instructorDTO) => http.post('/api/identity/Account/InstructorRegister', instructorDTO),
+  registerAdmin: async (adminDTO) => http.post('/api/identity/Account/AdminRegister', adminDTO),
+  getAllMajors: async () => http.get('/api/identity/Account/GetAllMajors'),
+  getAllDepartments: async () => http.get('/api/identity/Account/GetAllDepartments'),
 };

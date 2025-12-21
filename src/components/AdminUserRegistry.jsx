@@ -1,32 +1,36 @@
-import React, { useState } from 'react';
-// TODO: Wire to real registration endpoints if/when needed
-import './AdminUserRegistry.css';
+import React, { useState, useEffect } from "react";
+import { registerApi } from "../api/api";
+import "./AdminUserRegistry.css";
 
 const AdminUserRegistry = () => {
-  const [activeTab, setActiveTab] = useState('student'); // 'student', 'admin', 'instructor'
-  
+  const [activeTab, setActiveTab] = useState("student"); // 'student', 'admin', 'instructor'
+
   // Common fields
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   // Student-specific fields
-  const [majorId, setMajorId] = useState('');
-  const [gpa, setGpa] = useState('');
-  const [academicStatus, setAcademicStatus] = useState('');
-  const [enrollmentDate, setEnrollmentDate] = useState('');
-  const [overallCreditHours, setOverallCreditHours] = useState('');
-  
+  const [majorId, setMajorId] = useState("");
+  const [gpa, setGpa] = useState("");
+  const [academicStatus, setAcademicStatus] = useState("");
+  const [enrollmentDate, setEnrollmentDate] = useState("");
+  const [overallCreditHours, setOverallCreditHours] = useState("");
+  const [majors, setMajors] = useState([]);
+
   // Instructor-specific fields
-  const [office, setOffice] = useState('');
-  const [title, setTitle] = useState('');
-  
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [office, setOffice] = useState("");
+  const [title, setTitle] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [departments, setDepartments] = useState([]);
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
 
   const tabRefs = React.useRef({
     student: null,
@@ -49,6 +53,41 @@ const AdminUserRegistry = () => {
     }
   }, [activeTab]);
 
+  const fetchMajors = async () => {
+    try {
+      setIsFetchingData(true);
+      const data = await registerApi.getAllMajors();
+      const majorsList = Array.isArray(data) ? data : data?.items || [];
+      setMajors(majorsList);
+    } catch {
+      setError("Failed to load majors.");
+    } finally {
+      setIsFetchingData(false);
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      setIsFetchingData(true);
+      const data = await registerApi.getAllDepartments();
+      const departmentsList = Array.isArray(data) ? data : data?.items || [];
+      setDepartments(departmentsList);
+    } catch {
+      setError("Failed to load departments.");
+    } finally {
+      setIsFetchingData(false);
+    }
+  };
+
+  // Load majors and departments on tab change
+  useEffect(() => {
+    if (activeTab === "student" && majors.length === 0) {
+      fetchMajors();
+    } else if (activeTab === "instructor" && departments.length === 0) {
+      fetchDepartments();
+    }
+  }, [activeTab, majors.length, departments.length]);
+
   const resetForm = () => {
     setFirstName('');
     setLastName('');
@@ -63,6 +102,7 @@ const AdminUserRegistry = () => {
     setOverallCreditHours('');
     setOffice('');
     setTitle('');
+    setDepartmentId('');
   };
 
   const handleSubmit = async (e) => {
@@ -71,40 +111,122 @@ const AdminUserRegistry = () => {
     setSuccess('');
     setIsLoading(true);
 
+
+    const academicStatusMap = {
+      Regular: 0,
+      Suspended: 1,
+      Probation: 2,
+    };
+
     // Validation
-    if (!firstName || !lastName || !email || !phoneNumber || !password || !confirmPassword) {
-      setError('All required fields must be filled.');
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phoneNumber ||
+      !password ||
+      !confirmPassword
+    ) {
+      setError("All required fields must be filled.");
       setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       setIsLoading(false);
       return;
     }
 
     // Role-specific validation
-    if (activeTab === 'student') {
-      if (!majorId || !gpa || !academicStatus || !enrollmentDate || !overallCreditHours) {
-        setError('All student fields are required.');
+    if (activeTab === "student") {
+      if (
+        !majorId ||
+        !gpa ||
+        !academicStatus ||
+        !enrollmentDate ||
+        !overallCreditHours
+      ) {
+        setError("All student fields are required.");
         setIsLoading(false);
         return;
       }
-    } else if (activeTab === 'instructor') {
-      if (!office || !title) {
-        setError('All instructor fields are required.');
+      // Ensure date is in yyyy-mm-dd
+      const parsedDate = new Date(enrollmentDate);
+      if (Number.isNaN(parsedDate.getTime())) {
+        setError("Enrollment date is invalid. Use yyyy-mm-dd.");
+        setIsLoading(false);
+        return;
+      }
+    } else if (activeTab === "instructor") {
+      if (!office || !title || !departmentId) {
+        setError("All instructor fields are required.");
         setIsLoading(false);
         return;
       }
     }
 
     try {
-      // Registration endpoints exist per Swagger, but this form does not match DTOs yet
-      setSuccess('Registration form submitted (connect API when DTOs are finalized).');
+      if (activeTab === "student") {
+        const studentDTO = {
+          newStudent: {
+            User_Id: "",
+            UserId: "",
+            firstname: firstName,
+            lastname: lastName,
+            email,
+            phoneNumber,
+            password,
+            confirmPassword,
+            major_Id: majorId,
+            gpa: parseFloat(gpa),
+            academic_Status: academicStatusMap[academicStatus],
+            enrollment_Date: new Date(enrollmentDate)
+              .toISOString()
+              .split("T")[0], // yyyy-mm-dd
+            overallCreditsHours: parseInt(overallCreditHours),
+          },
+        };
+        await registerApi.registerStudent(studentDTO);
+        setSuccess("Student registered successfully!");
+      } else if (activeTab === "instructor") {
+        const instructorDTO = {
+          newInstructor: {
+            User_Id: "",
+            UserId: "",
+            firstname: firstName,
+            lastname: lastName,
+            email,
+            phoneNumber,
+            password,
+            confirmPassword,
+            departmnet_Id: departmentId,
+            office,
+            title,
+          },
+        };
+        await registerApi.registerInstructor(instructorDTO);
+        setSuccess("Instructor registered successfully!");
+      } else if (activeTab === "admin") {
+        const adminDTO = {
+          User_Id: "",
+          UserId: "",
+          firstname: firstName,
+          lastname: lastName,
+          email,
+          phoneNumber,
+          password,
+          confirmPassword,
+        };
+        await registerApi.registerAdmin(adminDTO);
+        setSuccess("Admin registered successfully!");
+      }
       resetForm();
-    } catch {
-      setError('An unexpected error occurred during registration.');
+    } catch (err) {
+      setError(
+        err?.data?.message ||
+          "An unexpected error occurred during registration."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -184,15 +306,20 @@ const AdminUserRegistry = () => {
         {activeTab === 'student' && (
           <>
             <label>
-              Major ID:
-              <input
-                type="text"
+              Major:
+              <select
                 value={majorId}
                 onChange={(e) => setMajorId(e.target.value)}
-                disabled={isLoading}
-                placeholder="Enter major ID"
+                disabled={isLoading || isFetchingData}
                 required
-              />
+              >
+                <option value="">-- Select a Major --</option>
+                {majors.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name || m.code}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               GPA:
@@ -210,14 +337,24 @@ const AdminUserRegistry = () => {
             </label>
             <label>
               Academic Status:
-              <input
-                type="text"
+              <select
                 value={academicStatus}
                 onChange={(e) => setAcademicStatus(e.target.value)}
                 disabled={isLoading}
-                placeholder="Enter academic status"
                 required
-              />
+              >
+                <option value="">-- Select Academic Status --</option>
+                <option value="Regular">Regular</option>
+                <option value="Suspended">Suspended</option>
+                <option value="Probation">Probation</option>
+              </select>
+              {academicStatus && (
+                <div
+                  className={`status-indicator status-${academicStatus.toLowerCase()}`}
+                >
+                  {academicStatus}
+                </div>
+              )}
             </label>
             <label>
               Enrollment Date:
@@ -248,6 +385,22 @@ const AdminUserRegistry = () => {
         {activeTab === 'instructor' && (
           <>
             <label>
+              Department:
+              <select
+                value={departmentId}
+                onChange={(e) => setDepartmentId(e.target.value)}
+                disabled={isLoading || isFetchingData}
+                required
+              >
+                <option value="">-- Select a Department --</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name || dept.code}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
               Office:
               <input
                 type="text"
@@ -264,8 +417,8 @@ const AdminUserRegistry = () => {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                                placeholder="Enter title"
                 disabled={isLoading}
-                placeholder="Enter title"
                 required
               />
             </label>

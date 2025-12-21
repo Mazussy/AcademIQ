@@ -14,15 +14,17 @@ const StudentDashboard = () => {
       setIsLoading(true);
       try {
         const data = await studentApi.dashboard();
-        // Normalize display name/fields from possible DTO shapes
+        // Normalize using the actual endpoint fields (full name is a single field)
+        const fullName = data.fullname || data.fullName || data.name || 'Student';
+        const enrollmentYear = data.enrollmentYear || (data.enrollment_Date ? new Date(data.enrollment_Date).getFullYear() : '—');
         const normalized = {
           id: data.id || data.userId || data.studentId || 'me',
-          name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' ') || 'Student',
-          major: data.major || data.major_Name || data.majorId || '—',
+          name: fullName,
+          major: data.major_Name || data.major || data.majorId || '—',
           gpa: data.gpa ?? '—',
           academicStatus: data.academic_Status ?? data.academicStatus ?? '—',
-          overallCreditHours: data.overallCreditsHours ?? data.overallCreditHours ?? '—',
-          enrollmentYear: data.enrollmentYear || (data.enrollment_Date ? new Date(data.enrollment_Date).getFullYear() : '—'),
+          overallCreditHours: data.overallCreditHours ?? data.overallCreditsHours ?? data.overallCreditHours ?? '—',
+          enrollmentYear,
         };
         setStudent(normalized);
       } catch {

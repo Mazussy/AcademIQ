@@ -14,14 +14,16 @@ const InstructorDashboard = () => {
       setIsLoading(true);
       try {
         const data = await instructorApi.info();
+        // Normalize to match the InstructorInfo endpoint fields (separate firstname/lastname)
+        const fullName = [data.firstname, data.lastname].filter(Boolean).join(' ') || data.name || 'Instructor';
         const normalized = {
-          id: data.id || data.user_Id || 'me',
-          name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' ') || 'Instructor',
-          department: data.department || data.departmnet_Name || data.departmnet_Id || '—',
+          id: data.id || data.user_Id || data.userId || 'me',
+          name: fullName,
+          department: data.departmnet_Name || data.department_Name || data.departmentName || data.department || '—',
           office: data.office || '—',
         };
         setInstructor(normalized);
-      } catch (err) {
+      } catch {
         setError('An unexpected error occurred while fetching data.');
       } finally {
         setIsLoading(false);

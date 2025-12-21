@@ -5,6 +5,7 @@ import "./AdminStudentList.css";
 const AdminStudentList = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
+  const [majors, setMajors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,37 +13,65 @@ const AdminStudentList = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentStudent, setCurrentStudent] = useState(null);
   const [formData, setFormData] = useState({
-    major: "",
+    id: "",
+    user_Id: "",
+    major_Id: "",
+    major_Name: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
     gpa: "",
-    academicStatus: "",
+    academic_Status: "",
+    enrollment_Date: "",
     overallCreditHours: "",
-    enrollmentYear: "",
   });
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      setIsLoading(true);
-      try {
-        const data = await adminApi.allStudents();
-        const list = Array.isArray(data) ? data : (data?.items || []);
-        const normalized = list.map((s) => ({
-          id: s.id || s.userId || s.studentId,
-          name: s.name || [s.firstName, s.lastName].filter(Boolean).join(' '),
-          major: s.major || s.major_Name || s.major_Id || '—',
-          gpa: s.gpa ?? '—',
-          academicStatus: s.academic_Status ?? s.academicStatus ?? '—',
-          overallCreditHours: s.overallCreditsHours ?? s.overallCreditHours ?? '—',
-          enrollmentYear: s.enrollmentYear || (s.enrollment_Date ? new Date(s.enrollment_Date).getFullYear() : '—'),
-        }));
-        setStudents(normalized);
-        setFilteredStudents(normalized);
-      } catch (err) {
-        setError("An unexpected error occurred while fetching student data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchStudents = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch both students and majors in parallel
+      const [studentsData, majorsData] = await Promise.all([
+        adminApi.allStudents(),
+        adminApi.majors(),
+      ]);
+      
+      // Create a map of major ID to major name
+      const majorsList = Array.isArray(majorsData) ? majorsData : (majorsData?.items || []);
+      const majorMap = {};
+      majorsList.forEach(major => {
+        majorMap[major.id] = major.name || major.id;
+      });
+      setMajors(majorsList);
 
+      // Normalize students with major names
+      const list = Array.isArray(studentsData) ? studentsData : (studentsData?.items || []);
+      const normalized = list.map((s) => ({
+        id: s.id || s.userId || s.studentId,
+        user_Id: s.user_Id || s.userId || s.id,
+        firstName: s.firstName || '',
+        lastName: s.lastName || '',
+        name: s.studentName || s.name || [s.firstName, s.lastName].filter(Boolean).join(' '),
+        email: s.email || '—',
+        phoneNumber: s.phoneNumber || '—',
+        major_Id: s.major_Id || s.majorId || '',
+        majorName: majorMap[s.major_Id] || s.major_Name || s.major || '—',
+        gpa: s.gpa ?? '—',
+        academic_Status: s.academic_Status ?? s.academicStatus ?? 0,
+        overallCreditHours: s.overallCreditsHours ?? s.overallCreditHours ?? '—',
+        enrollment_Date: s.enrollment_Date || '',
+        enrollmentYear: s.enrollmentYear || (s.enrollment_Date ? new Date(s.enrollment_Date).getFullYear() : '—'),
+      }));
+      setStudents(normalized);
+      setFilteredStudents(normalized);
+    } catch {
+      setError("An unexpected error occurred while fetching student data.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStudents();
   }, []);
 
@@ -52,7 +81,7 @@ const AdminStudentList = () => {
       (student) =>
         student.name.toLowerCase().includes(lowercasedFilter) ||
         student.id.toLowerCase().includes(lowercasedFilter) ||
-        student.major.toLowerCase().includes(lowercasedFilter)
+        student.majorName.toLowerCase().includes(lowercasedFilter)
     );
     setFilteredStudents(results);
   }, [searchTerm, students]);
@@ -63,39 +92,91 @@ const AdminStudentList = () => {
 
   const handleEditStudent = (student) => {
     setCurrentStudent(student);
+    // Parse name if firstName/lastName are empty
+    let firstName = student.firstName;
+    let lastName = student.lastName;
+    if (!firstName && !lastName && student.name) {
+      const nameParts = student.name.split(' ');
+      firstName = nameParts[0] || '';
+      lastName = nameParts.slice(1).join(' ') || '';
+    }
     setFormData({
-      major: student.major,
-      gpa: student.gpa,
-      academicStatus: student.academicStatus,
-      overallCreditHours: student.overallCreditHours,
-      enrollmentYear: student.enrollmentYear,
+      id: student.id,
+      user_Id: student.user_Id || student.id,
+      major_Id: student.major_Id,
+      major_Name: student.majorName,
+      firstName: firstName,
+      lastName: lastName,
+      email: student.email === '—' ? '' : student.email,
+      phoneNumber: student.phoneNumber === '—' ? '' : student.phoneNumber,
+      gpa: student.gpa === '—' ? '' : student.gpa,
+      academic_Status: student.academic_Status,
+      enrollment_Date: student.enrollment_Date,
+      overallCreditHours: student.overallCreditHours === '—' ? '' : student.overallCreditHours,
     });
     setShowModal(true);
   };
 
-  const handleDeleteStudent = (studentId) => {
+  const handleDeleteStudent = async (studentId) => {
     if (
       window.confirm(`Are you sure you want to delete student ${studentId}?`)
     ) {
-      setStudents(students.filter((student) => student.id !== studentId));
-      setFilteredStudents(
-        filteredStudents.filter((student) => student.id !== studentId)
-      );
+      try {
+        console.log('Deleting student with ID:', studentId);
+        await adminApi.deleteStudent(studentId);
+        setStudents(students.filter((student) => student.id !== studentId));
+        setFilteredStudents(
+          filteredStudents.filter((student) => student.id !== studentId)
+        );
+        alert('Student deleted successfully!');
+      } catch (err) {
+        console.error('Error deleting student:', err);
+        console.error('Error response:', err?.response?.data);
+        console.error('Error status:', err?.response?.status);
+        alert(`Failed to delete student: ${err?.response?.data?.message || err?.message || 'Unknown error'}`);
+      }
     }
   };
 
-  const handleSaveStudent = (e) => {
+  const handleSaveStudent = async (e) => {
     e.preventDefault();
-    const updatedStudents = students.map((student) =>
-      student.id === currentStudent.id ? { ...student, ...formData } : student
-    );
-    setStudents(updatedStudents);
-    setFilteredStudents(
-      filteredStudents.map((student) =>
-        student.id === currentStudent.id ? { ...student, ...formData } : student
-      )
-    );
-    setShowModal(false);
+    try {
+      const creditHours = parseInt(formData.overallCreditHours) || 0;
+      
+      // Send all required fields according to the API spec
+      const payload = {
+        id: formData.id,
+        user_Id: formData.user_Id,
+        major_Id: formData.major_Id,
+        major_Name: formData.major_Name,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        gpa: parseFloat(formData.gpa) || 0,
+        academic_Status: parseInt(formData.academic_Status),
+        enrollment_Date: formData.enrollment_Date,
+        overallCreditHours: creditHours,
+        overallCreditsHours: creditHours, // Try both field name variations
+      };
+      
+      console.log('Sending student update payload:', payload);
+      console.log('Credit hours value:', creditHours, 'from formData:', formData.overallCreditHours);
+      
+      // Make API call to save changes
+      const response = await adminApi.editStudent(payload);
+      console.log('Student update response:', response);
+      
+      // Refetch student list to get updated data from server
+      await fetchStudents();
+      
+      setShowModal(false);
+      alert('Student updated successfully!');
+    } catch (err) {
+      console.error('Error updating student:', err);
+      console.error('Error details:', err?.response?.data || err?.message);
+      alert(`Failed to update student: ${err?.response?.data?.message || err?.message || 'Unknown error'}`);
+    }
   };
 
   const handleFormChange = (e) => {
@@ -138,7 +219,7 @@ const AdminStudentList = () => {
               onClick={() => handleStudentClick(student.id)}
             >
               <h3>
-                {student.name} ({student.id})
+                {student.name}
               </h3>
             </div>
             <div className="student-actions">
@@ -169,7 +250,7 @@ const AdminStudentList = () => {
             >
               <ul>
                 <li>
-                  <strong>Major:</strong> {student.major}
+                  <strong>Major:</strong> {student.majorName}
                 </li>
                 <li>
                   <strong>GPA:</strong> {student.gpa}
@@ -180,12 +261,14 @@ const AdminStudentList = () => {
                     style={{
                       fontWeight: "bold",
                       color:
-                        student.academicStatus === "Good Standing"
+                        student.academic_Status === 0
                           ? "var(--primary-color)"
-                          : "var(--warning-color)",
+                          : student.academic_Status === 1
+                          ? "var(--warning-color)"
+                          : "var(--danger-color)",
                     }}
                   >
-                    {student.academicStatus}
+                    {student.academic_Status === 0 ? 'Regular' : student.academic_Status === 1 ? 'Probation' : 'Suspended'}
                   </span>
                 </li>
                 <li>
@@ -207,14 +290,66 @@ const AdminStudentList = () => {
             <h2>Edit Student: {currentStudent?.name}</h2>
             <form onSubmit={handleSaveStudent}>
               <label>
-                Major:
+                First Name:
                 <input
                   type="text"
-                  name="major"
-                  value={formData.major}
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleFormChange}
+                  disabled
+                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                />
+              </label>
+              <label>
+                Last Name:
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleFormChange}
+                  disabled
+                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                />
+              </label>
+              <label>
+                Email:
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleFormChange}
                   required
                 />
+              </label>
+              <label>
+                Phone Number:
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleFormChange}
+                />
+              </label>
+              <label>
+                Major:
+                <select
+                  name="major_Id"
+                  value={formData.major_Id}
+                  onChange={(e) => {
+                    const selectedMajor = majors.find(m => m.id === e.target.value);
+                    setFormData({
+                      ...formData,
+                      major_Id: e.target.value,
+                      major_Name: selectedMajor?.name || ''
+                    });
+                  }}
+                  required
+                >
+                  <option value="">Select a major</option>
+                  {majors.map(major => (
+                    <option key={major.id} value={major.id}>{major.name}</option>
+                  ))}
+                </select>
               </label>
               <label>
                 GPA:
@@ -224,20 +359,23 @@ const AdminStudentList = () => {
                   value={formData.gpa}
                   onChange={handleFormChange}
                   step="0.01"
+                  min="0"
+                  max="4"
                   required
                 />
               </label>
               <label>
                 Academic Status:
                 <select
-                  name="academicStatus"
-                  value={formData.academicStatus}
+                  name="academic_Status"
+                  value={formData.academic_Status}
                   onChange={handleFormChange}
                   required
                 >
                   <option value="">Select Status</option>
-                  <option value="Good Standing">Good Standing</option>
-                  <option value="Probation">Probation</option>
+                  <option value="0">Regular</option>
+                  <option value="1">Probation</option>
+                  <option value="2">Suspended</option>
                 </select>
               </label>
               <label>
@@ -251,12 +389,16 @@ const AdminStudentList = () => {
                 />
               </label>
               <label>
-                Enrollment Year:
+                Enrollment Date:
                 <input
-                  type="number"
-                  name="enrollmentYear"
-                  value={formData.enrollmentYear}
-                  onChange={handleFormChange}
+                  type="date"
+                  name="enrollment_Date"
+                  value={formData.enrollment_Date ? formData.enrollment_Date.split('T')[0] : ''}
+                  onChange={(e) => {
+                    // Convert to ISO datetime format expected by API
+                    const dateValue = e.target.value ? new Date(e.target.value).toISOString() : '';
+                    setFormData({ ...formData, enrollment_Date: dateValue });
+                  }}
                   required
                 />
               </label>

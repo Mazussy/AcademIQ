@@ -15,8 +15,8 @@ export function getToken() {
 }
 
 async function request(method, path, body, options = {}) {
-  const { useBearer = false, _retry = false } = options;
-  const token = getToken();
+  const { useBearer = false, _retry = false, skipAuth = false } = options;
+  const token = skipAuth ? null : getToken();
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -45,7 +45,7 @@ async function request(method, path, body, options = {}) {
   }
 
   // If unauthorized with a token, retry once with Bearer prefix
-  if (res.status === 401 && token && !useBearer && !_retry) {
+  if (res.status === 401 && token && !useBearer && !_retry && !skipAuth) {
     if (debug) {
       // eslint-disable-next-line no-console
       console.debug('[api] 401 received; retrying with Bearer prefix');

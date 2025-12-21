@@ -12,10 +12,16 @@ const AdminInstructorList = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentInstructor, setCurrentInstructor] = useState(null);
   const [formData, setFormData] = useState({
-    department: "",
+    id: "",
+    user_Id: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    employmentStatus: "",
-    hireYear: "",
+    phoneNumber: "",
+    departmnet_Id: "",
+    departmnet_Name: "",
+    office: "",
+    title: "",
   });
 
   useEffect(() => {
@@ -26,15 +32,20 @@ const AdminInstructorList = () => {
         const list = Array.isArray(data) ? data : (data?.items || []);
         const normalized = list.map((i) => ({
           id: i.id || i.user_Id || i.instructorId,
-          name: i.name || [i.firstName, i.lastName].filter(Boolean).join(' '),
-          department: i.department || i.departmnet_Name || i.departmnet_Id || '—',
+          user_Id: i.user_Id || i.id,
+          firstName: i.firstName || i.firstname || "",
+          lastName: i.lastName || i.lastname || "",
+          name: i.fullName || i.name || [i.firstName || i.firstname, i.lastName || i.lastname].filter(Boolean).join(" ") || i.id,
           email: i.email || '—',
-          employmentStatus: i.employmentStatus || i.status || '—',
-          hireYear: i.hireYear || '—',
+          phoneNumber: i.phoneNumber || '—',
+          departmnet_Id: i.departmnet_Id || i.departmentId || "",
+          departmnet_Name: i.departmnet_Name || i.departmentName || i.department || i.departmnet_Id || "—",
+          office: i.office || i.office_Number || i.officeNumber || i.office_Location || i.officeLocation || "—",
+          title: i.title || "",
         }));
         setInstructors(normalized);
         setFilteredInstructors(normalized);
-      } catch (err) {
+      } catch {
         setError("An unexpected error occurred while fetching instructor data.");
       } finally {
         setIsLoading(false);
@@ -50,7 +61,7 @@ const AdminInstructorList = () => {
       (instructor) =>
         instructor.name.toLowerCase().includes(lowercasedFilter) ||
         instructor.id.toLowerCase().includes(lowercasedFilter) ||
-        instructor.department.toLowerCase().includes(lowercasedFilter)
+        instructor.departmnet_Name.toLowerCase().includes(lowercasedFilter)
     );
     setFilteredInstructors(results);
   }, [searchTerm, instructors]);
@@ -61,38 +72,90 @@ const AdminInstructorList = () => {
 
   const handleEditInstructor = (instructor) => {
     setCurrentInstructor(instructor);
+    // If firstName/lastName are empty, derive from the full name
+    let firstName = instructor.firstName;
+    let lastName = instructor.lastName;
+    if (!firstName && !lastName && instructor.name) {
+      const nameParts = instructor.name.split(' ');
+      firstName = nameParts[0] || '';
+      lastName = nameParts.slice(1).join(' ') || '';
+    }
     setFormData({
-      department: instructor.department,
+      id: instructor.id,
+      user_Id: instructor.user_Id || instructor.id,
+      firstName: firstName,
+      lastName: lastName,
       email: instructor.email,
-      employmentStatus: instructor.employmentStatus,
-      hireYear: instructor.hireYear,
+      phoneNumber: instructor.phoneNumber === '—' ? '' : instructor.phoneNumber,
+      departmnet_Id: instructor.departmnet_Id,
+      departmnet_Name: instructor.departmnet_Name,
+      office: instructor.office === '—' ? '' : instructor.office,
+      title: instructor.title,
     });
     setShowModal(true);
   };
 
-  const handleDeleteInstructor = (instructorId) => {
+  const handleDeleteInstructor = async (instructorId) => {
     if (
       window.confirm(`Are you sure you want to delete instructor ${instructorId}?`)
     ) {
-      setInstructors(instructors.filter((instructor) => instructor.id !== instructorId));
-      setFilteredInstructors(
-        filteredInstructors.filter((instructor) => instructor.id !== instructorId)
-      );
+      try {
+        console.log('Deleting instructor with ID:', instructorId);
+        await adminApi.deleteInstructor(instructorId);
+        setInstructors(instructors.filter((instructor) => instructor.id !== instructorId));
+        setFilteredInstructors(
+          filteredInstructors.filter((instructor) => instructor.id !== instructorId)
+        );
+        alert('Instructor deleted successfully!');
+      } catch (err) {
+        console.error('Error deleting instructor:', err);
+        console.error('Error response:', err?.response?.data);
+        console.error('Error status:', err?.response?.status);
+        alert(`Failed to delete instructor: ${err?.response?.data?.message || err?.message || 'Unknown error'}`);
+      }
     }
   };
 
-  const handleSaveInstructor = (e) => {
+  const handleSaveInstructor = async (e) => {
     e.preventDefault();
-    const updatedInstructors = instructors.map((instructor) =>
-      instructor.id === currentInstructor.id ? { ...instructor, ...formData } : instructor
-    );
-    setInstructors(updatedInstructors);
-    setFilteredInstructors(
-      filteredInstructors.map((instructor) =>
+    try {
+      // Send all required fields including hidden id, user_Id, and departmnet_Id
+      const payload = {
+        id: formData.id,
+        user_Id: currentInstructor.user_Id || formData.id,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        departmnet_Id: formData.departmnet_Id,
+        departmnet_Name: formData.departmnet_Name,
+        office: formData.office,
+        title: formData.title,
+      };
+      
+      console.log('Sending instructor update payload:', payload);
+      
+      // Make API call to save changes
+      const response = await adminApi.editInstructor(payload);
+      console.log('Instructor update response:', response);
+      
+      // Update local state only after successful API response
+      const updatedInstructors = instructors.map((instructor) =>
         instructor.id === currentInstructor.id ? { ...instructor, ...formData } : instructor
-      )
-    );
-    setShowModal(false);
+      );
+      setInstructors(updatedInstructors);
+      setFilteredInstructors(
+        filteredInstructors.map((instructor) =>
+          instructor.id === currentInstructor.id ? { ...instructor, ...formData } : instructor
+        )
+      );
+      setShowModal(false);
+      alert('Instructor updated successfully!');
+    } catch (err) {
+      console.error('Error updating instructor:', err);
+      console.error('Error details:', err?.response?.data || err?.message);
+      alert(`Failed to update instructor: ${err?.response?.data?.message || err?.message || 'Unknown error'}`);
+    }
   };
 
   const handleFormChange = (e) => {
@@ -134,9 +197,7 @@ const AdminInstructorList = () => {
               className="instructor-info"
               onClick={() => handleInstructorClick(instructor.id)}
             >
-              <h3>
-                {instructor.name} ({instructor.id})
-              </h3>
+              <h3>{instructor.name}</h3>
             </div>
             <div className="instructor-actions">
               <button
@@ -166,28 +227,15 @@ const AdminInstructorList = () => {
             >
               <ul>
                 <li>
-                  <strong>Department:</strong> {instructor.department}
+                  <strong>Department:</strong> {instructor.departmnet_Name}
                 </li>
                 <li>
                   <strong>Email:</strong> {instructor.email}
                 </li>
                 <li>
-                  <strong>Employment Status:</strong>{" "}
-                  <span
-                    style={{
-                      fontWeight: "bold",
-                      color:
-                        instructor.employmentStatus === "Full-Time"
-                          ? "var(--primary-color)"
-                          : "var(--warning-color)",
-                    }}
-                  >
-                    {instructor.employmentStatus}
-                  </span>
+                  <strong>Office:</strong> {instructor.office}
                 </li>
-                <li>
-                  <strong>Hire Year:</strong> {instructor.hireYear}
-                </li>
+                
               </ul>
             </div>
           </div>
@@ -200,13 +248,25 @@ const AdminInstructorList = () => {
             <h2>Edit Instructor: {currentInstructor?.name}</h2>
             <form onSubmit={handleSaveInstructor}>
               <label>
-                Department:
+                First Name:
                 <input
                   type="text"
-                  name="department"
-                  value={formData.department}
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleFormChange}
-                  required
+                  disabled
+                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                />
+              </label>
+              <label>
+                Last Name:
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleFormChange}
+                  disabled
+                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
                 />
               </label>
               <label>
@@ -220,28 +280,52 @@ const AdminInstructorList = () => {
                 />
               </label>
               <label>
-                Employment Status:
+                Phone Number:
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleFormChange}
+                />
+              </label>
+              <label>
+                Department:
+                <input
+                  type="text"
+                  name="departmnet_Name"
+                  value={formData.departmnet_Name}
+                  onChange={handleFormChange}
+                  disabled
+                  style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                />
+              </label>
+              <label>
+                Title:
                 <select
-                  name="employmentStatus"
-                  value={formData.employmentStatus}
+                  name="title"
+                  value={formData.title}
                   onChange={handleFormChange}
                   required
                 >
-                  <option value="">Select Status</option>
-                  <option value="Full-Time">Full-Time</option>
-                  <option value="Part-Time">Part-Time</option>
+                  <option value="">Select a title</option>
+                  <option value="Dr">Dr</option>
+                  <option value="Prof">Prof</option>
+                  <option value="Assoc Prof">Assoc Prof</option>
+                  <option value="Asst Prof">Asst Prof</option>
+                  <option value="Lecturer">Lecturer</option>
+                  <option value="TA">TA</option>
                 </select>
               </label>
               <label>
-                Hire Year:
+                Office:
                 <input
-                  type="number"
-                  name="hireYear"
-                  value={formData.hireYear}
+                  type="text"
+                  name="office"
+                  value={formData.office}
                   onChange={handleFormChange}
-                  required
                 />
               </label>
+
               <div className="form-actions">
                 <button
                   type="button"
